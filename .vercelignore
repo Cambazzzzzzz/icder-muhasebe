@@ -1,8 +1,0 @@
-node_modules
-dist
-build
-electron.js
-preload.js
-*.md
-.git
-.gitignore
