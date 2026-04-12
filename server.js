@@ -10,7 +10,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
-  secret: 'defterdar-cms-2024',
+  secret: process.env.SESSION_SECRET || 'defterdar-cms-2024',
   resave: false,
   saveUninitialized: false,
   cookie: { maxAge: 8 * 60 * 60 * 1000 }

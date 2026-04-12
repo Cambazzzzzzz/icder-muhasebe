@@ -4,6 +4,9 @@
   "description": "Defterdar Muhasebe - STK Muhasebe Sistemi",
   "main": "electron.js",
   "author": "CMS Team",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "start": "node server.js",
     "electron": "electron .",

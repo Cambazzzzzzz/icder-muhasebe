@@ -1,5 +1,7 @@
 const router = require('express').Router();
-const { getDb } = require('./database');
+const { getDb } = process.env.RAILWAY_ENVIRONMENT || process.env.PORT
+  ? require('./database-web')
+  : require('./database');
 
 // ─── ORGANİZASYONLAR ───────────────────────────────────────────────────────
 
