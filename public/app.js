@@ -100,21 +100,18 @@ async function kurulumKaydet() {
 async function sifreDegistir() {
   const mevcutSifre = document.getElementById('sifre-mevcut').value.trim();
   const yeniSifre = document.getElementById('sifre-yeni').value.trim();
-  const adminSifre = document.getElementById('sifre-admin').value.trim();
   
-  if (!mevcutSifre || !yeniSifre || !adminSifre) {
-    return toast('Tüm alanları doldurun', 'error');
+  if (!mevcutSifre || !yeniSifre) {
+    return toast('Mevcut şifre ve yeni şifre gerekli', 'error');
   }
   
   try {
     await api('POST', '/auth/icder-sifre-degistir', { 
       mevcut_sifre: mevcutSifre, 
-      yeni_sifre: yeniSifre, 
-      admin_sifre: adminSifre 
+      yeni_sifre: yeniSifre
     });
     document.getElementById('sifre-mevcut').value = '';
     document.getElementById('sifre-yeni').value = '';
-    document.getElementById('sifre-admin').value = '';
     toast('Şifre başarıyla değiştirildi');
   } catch(e) { 
     toast(e.message, 'error'); 
@@ -140,7 +137,7 @@ async function modalAyarlar() {
     ? '<img src="' + _kullaniciAyarlar.bayrak_data + '" style="max-height:70px;max-width:100%;border-radius:6px;object-fit:contain"/>'
     : '<i class="fa-solid fa-flag" style="font-size:22px;color:var(--text3)"></i><div style="color:var(--text3);font-size:12px;margin-top:4px">Yüklenmedi</div>';
 
-  openModal('Yazdırma Ayarları', `
+  openModal('Ayarlar', `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:12px">
       <div class="form-group">
         <label><i class="fa-solid fa-image"></i> Logonuz</label>
@@ -160,7 +157,7 @@ async function modalAyarlar() {
     <hr style="margin:20px 0;border:none;border-top:1px solid var(--border)"/>
     <div style="margin-bottom:16px">
       <h3 style="margin:0 0 12px 0;font-size:16px;color:var(--text1)"><i class="fa-solid fa-lock"></i> İÇDER Kurban Şifresi Değiştir</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div class="form-group">
           <label>Mevcut Şifre</label>
           <input type="password" id="sifre-mevcut" placeholder="Mevcut şifreniz"/>
@@ -168,10 +165,6 @@ async function modalAyarlar() {
         <div class="form-group">
           <label>Yeni Şifre</label>
           <input type="password" id="sifre-yeni" placeholder="Yeni şifre"/>
-        </div>
-        <div class="form-group">
-          <label>Yönetici Şifresi</label>
-          <input type="password" id="sifre-admin" placeholder="İcderYetkili_00571"/>
         </div>
       </div>
       <button class="btn btn-secondary" style="margin-top:8px" onclick="sifreDegistir()">
@@ -1333,29 +1326,23 @@ async function renderDenetim() {
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
       <div class="card" style="grid-column:1/-1;border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.05)">
-        <div class="card-title"><i class="fa-solid fa-wifi"></i> Ag Erisimi — WiFi'deki Cihazlar</div>
+        <div class="card-title"><i class="fa-solid fa-globe"></i> Web Site</div>
         <table style="font-size:13px;width:100%">
-          ${ipRows}
-          <tr><td style="color:var(--text3);padding:7px 0;width:130px">Kullanim</td><td style="font-size:12px;color:var(--text2)">Ayni WiFi'deki telefon veya bilgisayardan tarayicida yukardaki adresi ac</td></tr>
+          <tr><td style="color:var(--text3);padding:7px 0;width:130px">Adres</td>
+          <td><span style="color:var(--green);font-weight:700;font-size:14px">https://defterdar.xyz/</span>
+          <button class="btn btn-primary btn-sm" style="margin-left:8px" onclick="window.open('https://defterdar.xyz/', '_blank')"><i class="fa-solid fa-external-link"></i> Aç</button>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">Defterdar web sitesine git</div></td></tr>
         </table>
-      </div>
-      <div class="card" style="grid-column:1/-1;border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.05)">
-        <div class="card-title"><i class="fa-solid fa-key"></i> Giriş Şifresi Değiştir</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:12px">
-          Site girişinde kullanılan şifreyi değiştirin. Varsayılan şifre: <strong>571571</strong>
-        </div>
-        <button class="btn btn-danger" onclick="modalSifreDegistir()">
-          <i class="fa-solid fa-lock"></i> Şifre Değiştir
-        </button>
       </div>
       <div class="card">
         <div class="card-title"><i class="fa-solid fa-circle-info"></i> Uygulama Bilgileri</div>
         <table style="font-size:13px;width:100%">
           <tr><td style="color:var(--text3);padding:7px 0;width:130px">Uygulama</td><td style="font-weight:600">İÇDER Kurban Programı</td></tr>
-          <tr><td style="color:var(--text3);padding:7px 0">Versiyon</td><td>1.0.0</td></tr>
+          <tr><td style="color:var(--text3);padding:7px 0">Versiyon</td><td>1.0.5</td></tr>
+          <tr><td style="color:var(--text3);padding:7px 0">Kurucu</td><td style="color:var(--accent);font-weight:600">İsmail DEMİRCAN</td></tr>
+          <tr><td style="color:var(--text3);padding:7px 0">Alt Yapı</td><td style="color:var(--accent);font-weight:600">DEFTERDAR Muhasebe</td></tr>
           <tr><td style="color:var(--text3);padding:7px 0">İşbirliği</td><td style="color:var(--accent);font-weight:600">İÇDER & Defterdar</td></tr>
-          <tr><td style="color:var(--text3);padding:7px 0">Modul</td><td>Kurban Organizasyonu</td></tr>
-          <tr><td style="color:var(--text3);padding:7px 0">Lisans</td><td>İÇDER &copy; 2025</td></tr>
+          <tr><td style="color:var(--text3);padding:7px 0">Lisans</td><td>İÇDER &copy; 2026</td></tr>
         </table>
       </div>
       <div class="card">
@@ -1377,43 +1364,18 @@ async function renderDenetim() {
     </div>`;
 }
 
-// ─── ŞİFRE DEĞİŞTİRME MODALI ────────────────────────────────────────────────
-function modalSifreDegistir() {
-  openModal('Giriş Şifresi Değiştir', `
-    <div class="form-group">
-      <label><i class="fa-solid fa-key"></i> Yeni Şifre</label>
-      <input type="password" id="yeni-sifre" class="form-control" placeholder="Yeni şifrenizi girin" />
-    </div>
-    <div class="form-group">
-      <label><i class="fa-solid fa-shield-halved"></i> Yönetici Şifresi</label>
-      <input type="password" id="yonetici-sifre" class="form-control" placeholder="İcderYetkili_00571" />
-      <small style="color:var(--text3);font-size:11px;margin-top:4px;display:block">
-        Şifre değiştirmek için yönetici şifresi gereklidir
-      </small>
-    </div>
-    <div class="form-actions">
-      <button class="btn btn-secondary" onclick="closeModal()">İptal</button>
-      <button class="btn btn-danger" onclick="sifreDegistir()"><i class="fa-solid fa-check"></i> Değiştir</button>
-    </div>
-  `, false, 'key');
-}
-
-async function sifreDegistir() {
-  const yeniSifre = document.getElementById('yeni-sifre').value.trim();
-  const yoneticiSifre = document.getElementById('yonetici-sifre').value.trim();
-
-  if (!yeniSifre) return toast('Yeni şifre gerekli', 'error');
-  if (!yoneticiSifre) return toast('Yönetici şifresi gerekli', 'error');
-
+// ═══════════════════════════════════════════════════════════════════════════
+// ÇIKIŞ YAP
+// ═══════════════════════════════════════════════════════════════════════════
+async function cikisYap() {
+  if (!confirm('Çıkış yapmak istediğinizden emin misiniz?')) return;
   try {
-    await api('POST', '/auth/icder-sifre-degistir', { yeni_sifre: yeniSifre, yonetici_sifre: yoneticiSifre });
-    closeModal();
-    toast('Şifre başarıyla değiştirildi');
-  } catch (e) {
-    toast(e.message, 'error');
+    await api('POST', '/auth/cikis');
+    window.location.href = '/icder-giris';
+  } catch(e) {
+    toast('Çıkış yapılamadı: ' + e.message, 'error');
   }
 }
-
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ÇÖP KUTUSU
