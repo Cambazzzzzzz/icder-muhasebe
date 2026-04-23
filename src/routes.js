@@ -578,9 +578,15 @@ router.get('/tam-yedek', async (req, res) => {
       yedek.organizasyonlar.push(orgData);
     }
 
-    // Kullanıcı ayarlarını ekle
+    // Kullanıcı ayarlarını ekle (eski tablo)
     const ayarlar = db.prepare('SELECT * FROM kullanici_ayarlar WHERE kullanici_id=?').get(req.session.userId);
     yedek.ayarlar = ayarlar || {};
+    
+    // Yazdırma ayarlarını ekle (yeni tablo - logo ve bayrak)
+    const yazdirmaAyarlari = db.prepare('SELECT logo_data, bayrak_data, icder_sifre FROM ayarlar WHERE kullanici_id=?').get(req.session.userId);
+    if (yazdirmaAyarlari) {
+      yedek.yazdirma_ayarlari = yazdirmaAyarlari;
+    }
 
     // JSON olarak indir
     const tarih = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
@@ -690,7 +696,7 @@ router.post('/yedek-geri-yukle', upload.single('dosya'), async (req, res) => {
       }
     }
 
-    // Ayarları geri yükle
+    // Ayarları geri yükle (eski tablo)
     if (yedek.ayarlar && (yedek.ayarlar.logo_data || yedek.ayarlar.bayrak_data)) {
       const mevcutAyar = db.prepare('SELECT id FROM kullanici_ayarlar WHERE kullanici_id=?').get(req.session.userId);
       if (mevcutAyar) {
@@ -702,9 +708,21 @@ router.post('/yedek-geri-yukle', upload.single('dosya'), async (req, res) => {
       }
     }
 
+    // Yazdırma ayarlarını geri yükle (yeni tablo - logo, bayrak, icder_sifre)
+    if (yedek.yazdirma_ayarlari) {
+      const mevcutAyar = db.prepare('SELECT id FROM ayarlar WHERE kullanici_id=?').get(req.session.userId);
+      if (mevcutAyar) {
+        db.prepare('UPDATE ayarlar SET logo_data=COALESCE(?, logo_data), bayrak_data=COALESCE(?, bayrak_data), icder_sifre=COALESCE(?, icder_sifre) WHERE kullanici_id=?')
+          .run(yedek.yazdirma_ayarlari.logo_data || null, yedek.yazdirma_ayarlari.bayrak_data || null, yedek.yazdirma_ayarlari.icder_sifre || null, req.session.userId);
+      } else {
+        db.prepare('INSERT INTO ayarlar (kullanici_id, logo_data, bayrak_data, icder_sifre, kurulum_tamamlandi) VALUES (?,?,?,?,1)')
+          .run(req.session.userId, yedek.yazdirma_ayarlari.logo_data || null, yedek.yazdirma_ayarlari.bayrak_data || null, yedek.yazdirma_ayarlari.icder_sifre || null);
+      }
+    }
+
     res.json({
       ok: true,
-      mesaj: `${istatistik.organizasyonlar} yeni organizasyon, ${istatistik.kurbanlar} yeni kurban, ${istatistik.hisseler} yeni hisse eklendi. ${istatistik.guncellendi} organizasyon güncellendi.`,
+      mesaj: `${istatistik.organizasyonlar} yeni organizasyon, ${istatistik.kurbanlar} yeni kurban, ${istatistik.hisseler} yeni hisse eklendi. ${istatistik.guncellendi} organizasyon güncellendi. ${yedek.yazdirma_ayarlari ? 'Yazdırma ayarları geri yüklendi.' : ''}`,
       detay: istatistik
     });
   } catch(e) {
