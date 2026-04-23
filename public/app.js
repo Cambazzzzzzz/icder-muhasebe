@@ -499,7 +499,7 @@ function filterKurbanlar() {
             <div id="row-print-menu-${k.id}" class="dropdown-menu" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);min-width:180px;z-index:1000;white-space:nowrap">
               <div onclick="yazdirKurbanSatir(${k.id})" style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background 0.2s" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'">
                 <i class="fa-solid fa-print" style="width:20px;color:var(--accent)"></i>
-                <span>Yazdır (Yatay)</span>
+                <span>Yazdır</span>
               </div>
               <div onclick="excelIndirKurbanSatir(${k.id})" style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background 0.2s" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='transparent'">
                 <i class="fa-solid fa-file-excel" style="width:20px;color:var(--green)"></i>
@@ -1124,10 +1124,53 @@ function yazdir(tip) {
 }
 
 async function yazdirKurban(kurbanId, kurbanNo, tur) {
-  // Direkt yatay (landscape) yazdır
+  // Modal ile yazdırma yönü seç
+  openModal('Yazdırma Yönü Seçin', `
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:48px;margin-bottom:12px">🖨️</div>
+      <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px">Kurban #${kurbanNo}</div>
+      <div style="font-size:13px;color:var(--text2)">Yazdırma yönünü seçin</div>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div class="card" style="cursor:pointer;border:2px solid var(--border);transition:all 0.2s;padding:24px;text-align:center" 
+           onclick="yazdirKurbanYon(${kurbanId}, ${kurbanNo}, '${tur}', 'portrait')"
+           onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--glow2)'"
+           onmouseout="this.style.borderColor='var(--border)';this.style.background='transparent'">
+        <i class="fa-solid fa-file-lines" style="font-size:48px;color:var(--accent);margin-bottom:12px"></i>
+        <div style="font-size:15px;font-weight:600;margin-bottom:4px">Dikey</div>
+        <div style="font-size:12px;color:var(--text3)">Portrait (A4 Dikey)</div>
+      </div>
+      
+      <div class="card" style="cursor:pointer;border:2px solid var(--border);transition:all 0.2s;padding:24px;text-align:center" 
+           onclick="yazdirKurbanYon(${kurbanId}, ${kurbanNo}, '${tur}', 'landscape')"
+           onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--glow2)'"
+           onmouseout="this.style.borderColor='var(--border)';this.style.background='transparent'">
+        <i class="fa-solid fa-file" style="font-size:48px;color:var(--green);margin-bottom:12px;transform:rotate(90deg)"></i>
+        <div style="font-size:15px;font-weight:600;margin-bottom:4px">Yatay</div>
+        <div style="font-size:12px;color:var(--text3)">Landscape (A4 Yatay)</div>
+      </div>
+    </div>
+    
+    <div style="background:var(--bg4);border-radius:8px;padding:12px;font-size:12px;color:var(--text3);text-align:center">
+      <i class="fa-solid fa-info-circle" style="color:var(--accent)"></i>
+      Yazdırma penceresi açıldıktan sonra yazıcı ayarlarından da değiştirebilirsiniz
+    </div>
+    
+    <div class="form-actions" style="margin-top:16px">
+      <button class="btn btn-secondary" onclick="closeModal()">
+        <i class="fa-solid fa-times"></i> İptal
+      </button>
+    </div>
+  `, false, 'print');
+}
+
+async function yazdirKurbanYon(kurbanId, kurbanNo, tur, orientation) {
+  closeModal();
+  toast('Yazdırma hazırlanıyor...');
   const hisseler = await api('GET', '/kurbanlar/' + kurbanId + '/hisseler');
   const kurbanData = _kurbanlar.find(k => k.id === kurbanId) || {};
-  const html = kurbanYazdirHTML(kurbanNo, tur, hisseler, kurbanData, 'landscape');
+  const html = kurbanYazdirHTML(kurbanNo, tur, hisseler, kurbanData, orientation);
   printHTML(html);
 }
 

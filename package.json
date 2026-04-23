@@ -1,6 +1,6 @@
 {
   "name": "icder-kurban",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "İÇDER Kurban Programı - İÇDER & Defterdar İşbirliği",
   "main": "electron.js",
   "author": "İÇDER & Defterdar",
