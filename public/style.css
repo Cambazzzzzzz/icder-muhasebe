@@ -1,66 +1,171 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+/* ── KOYU YEŞİL TEMA (Varsayılan) ── */
 :root {
-  --bg:      #070f0b;
-  --bg2:     #0d1a12;
-  --bg3:     #112718;
-  --bg4:     #1a3522;
-  --bg5:     #1e4028;
-  --border:  #1f4529;
-  --border2: #264833;
+  --bg:      #0a1410;
+  --bg2:     #0f1e18;
+  --bg3:     #152820;
+  --bg4:     #1d3529;
+  --bg5:     #254232;
+  --border:  #2a4a38;
+  --border2: #355740;
   --accent:  #10b981;
   --accent2: #34d399;
   --purple:  #8bfac7;
   --green:   #10b981;
-  --yellow:  #f59e0b;
+  --yellow:  #fbbf24;
   --red:     #ef4444;
-  --text:    #e2f0e8;
-  --text2:   #94b8a3;
-  --text3:   #4b7a5e;
-  --glow:    rgba(16,185,129,0.15);
-  --glow2:   rgba(16,185,129,0.08);
+  --text:    #e8f5ee;
+  --text2:   #a8c9b8;
+  --text3:   #5a8570;
+  --glow:    rgba(16,185,129,0.2);
+  --glow2:   rgba(16,185,129,0.1);
   --r:       10px;
   --r2:      16px;
-  --shadow:  0 8px 32px rgba(0,0,0,0.5);
+  --shadow:  0 8px 32px rgba(0,0,0,0.4);
+  --hover-bg: rgba(16,185,129,0.08);
+  --card-bg: var(--bg3);
 }
 
-/* ── BEYAZ TEMA ── */
-body.light {
-  --bg:      #f0f4ff;
+/* ── AÇIK YEŞİL TEMA ── */
+body.theme-light-green {
+  --bg:      #f0fdf7;
   --bg2:     #ffffff;
-  --bg3:     #f8faff;
-  --bg4:     #eef2fb;
-  --bg5:     #e4eaf7;
-  --border:  #d0d9f0;
-  --border2: #bcc8e8;
-  --accent:  #3b6ef0;
-  --accent2: #5a88f5;
-  --purple:  #7c5cdb;
-  --green:   #0ea572;
-  --yellow:  #d97706;
+  --bg3:     #f7fefb;
+  --bg4:     #ecfdf5;
+  --bg5:     #d1fae5;
+  --border:  #a7f3d0;
+  --border2: #6ee7b7;
+  --accent:  #059669;
+  --accent2: #10b981;
+  --purple:  #8b5cf6;
+  --green:   #059669;
+  --yellow:  #f59e0b;
   --red:     #dc2626;
-  --text:    #0f172a;
-  --text2:   #334155;
-  --text3:   #64748b;
-  --glow:    rgba(59,110,240,0.12);
-  --glow2:   rgba(59,110,240,0.06);
-  --shadow:  0 8px 32px rgba(0,0,0,0.12);
+  --text:    #064e3b;
+  --text2:   #065f46;
+  --text3:   #059669;
+  --glow:    rgba(5,150,105,0.15);
+  --glow2:   rgba(5,150,105,0.08);
+  --shadow:  0 8px 32px rgba(0,0,0,0.08);
+  --hover-bg: rgba(5,150,105,0.06);
+  --card-bg: #ffffff;
 }
 
-body.light .topbar {
-  background: linear-gradient(90deg, #ffffff, #f5f8ff);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+/* ── BEYAZ/MAVİ TEMA ── */
+body.theme-light {
+  --bg:      #f8fafc;
+  --bg2:     #ffffff;
+  --bg3:     #f1f5f9;
+  --bg4:     #e2e8f0;
+  --bg5:     #cbd5e1;
+  --border:  #cbd5e1;
+  --border2: #94a3b8;
+  --accent:  #3b82f6;
+  --accent2: #60a5fa;
+  --purple:  #8b5cf6;
+  --green:   #10b981;
+  --yellow:  #f59e0b;
+  --red:     #ef4444;
+  --text:    #0f172a;
+  --text2:   #475569;
+  --text3:   #64748b;
+  --glow:    rgba(59,130,246,0.15);
+  --glow2:   rgba(59,130,246,0.08);
+  --shadow:  0 8px 32px rgba(0,0,0,0.1);
+  --hover-bg: rgba(59,130,246,0.06);
+  --card-bg: #ffffff;
 }
-body.light .sidebar {
-  background: linear-gradient(180deg, #ffffff 0%, #f5f8ff 100%);
+
+/* ── NANE YEŞİLİ TEMA ── */
+body.theme-mint {
+  --bg:      #f0fdfa;
+  --bg2:     #ffffff;
+  --bg3:     #ccfbf1;
+  --bg4:     #99f6e4;
+  --bg5:     #5eead4;
+  --border:  #5eead4;
+  --border2: #2dd4bf;
+  --accent:  #14b8a6;
+  --accent2: #2dd4bf;
+  --purple:  #a78bfa;
+  --green:   #14b8a6;
+  --yellow:  #fbbf24;
+  --red:     #f87171;
+  --text:    #134e4a;
+  --text2:   #115e59;
+  --text3:   #14b8a6;
+  --glow:    rgba(20,184,166,0.2);
+  --glow2:   rgba(20,184,166,0.1);
+  --shadow:  0 8px 32px rgba(0,0,0,0.08);
+  --hover-bg: rgba(20,184,166,0.08);
+  --card-bg: #ffffff;
 }
-body.light .main {
-  background: radial-gradient(ellipse at 20% 0%, rgba(59,110,240,0.04) 0%, transparent 60%),
-              radial-gradient(ellipse at 80% 100%, rgba(124,92,219,0.03) 0%, transparent 60%),
+
+/* ── ZEYTİN YEŞİLİ TEMA ── */
+body.theme-olive {
+  --bg:      #f7fee7;
+  --bg2:     #ffffff;
+  --bg3:     #ecfccb;
+  --bg4:     #d9f99d;
+  --bg5:     #bef264;
+  --border:  #a3e635;
+  --border2: #84cc16;
+  --accent:  #65a30d;
+  --accent2: #84cc16;
+  --purple:  #a78bfa;
+  --green:   #65a30d;
+  --yellow:  #eab308;
+  --red:     #dc2626;
+  --text:    #365314;
+  --text2:   #4d7c0f;
+  --text3:   #65a30d;
+  --glow:    rgba(101,163,13,0.2);
+  --glow2:   rgba(101,163,13,0.1);
+  --shadow:  0 8px 32px rgba(0,0,0,0.08);
+  --hover-bg: rgba(101,163,13,0.08);
+  --card-bg: #ffffff;
+}
+
+/* Açık temalar için özel stiller */
+body.theme-light .topbar,
+body.theme-light-green .topbar,
+body.theme-mint .topbar,
+body.theme-olive .topbar {
+  background: linear-gradient(90deg, var(--bg2), var(--bg3));
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+body.theme-light .sidebar,
+body.theme-light-green .sidebar,
+body.theme-mint .sidebar,
+body.theme-olive .sidebar {
+  background: linear-gradient(180deg, var(--bg2) 0%, var(--bg3) 100%);
+}
+
+body.theme-light .main,
+body.theme-light-green .main,
+body.theme-mint .main,
+body.theme-olive .main {
+  background: radial-gradient(ellipse at 20% 0%, var(--glow2) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 100%, var(--glow) 0%, transparent 60%),
               var(--bg);
 }
-body.light .form-group select option { background: #ffffff; color: #0f172a; }
-body.light .modal { background: linear-gradient(135deg, #ffffff, #f8faff); }
+
+body.theme-light .form-group select option,
+body.theme-light-green .form-group select option,
+body.theme-mint .form-group select option,
+body.theme-olive .form-group select option { 
+  background: var(--bg2); 
+  color: var(--text); 
+}
+
+body.theme-light .modal,
+body.theme-light-green .modal,
+body.theme-mint .modal,
+body.theme-olive .modal { 
+  background: linear-gradient(135deg, var(--bg2), var(--bg3)); 
+}
 
 /* ── TEMA TOGGLE ── */
 .theme-toggle {

@@ -1978,20 +1978,66 @@ async function excelYedekSecildi(input) {
 // ═══════════════════════════════════════════════════════════════════════════
 // TEMA TOGGLE
 // ═══════════════════════════════════════════════════════════════════════════
+// TEMA SİSTEMİ
+// ═══════════════════════════════════════════════════════════════════════════
+const TEMALAR = [
+  { id: 'dark', name: 'Koyu Yeşil', class: '' },
+  { id: 'light-green', name: 'Açık Yeşil', class: 'theme-light-green' },
+  { id: 'mint', name: 'Nane Yeşili', class: 'theme-mint' },
+  { id: 'olive', name: 'Zeytin Yeşili', class: 'theme-olive' },
+  { id: 'light', name: 'Beyaz/Mavi', class: 'theme-light' }
+];
+
 function toggleTheme() {
-  const isLight = document.body.classList.toggle('light');
-  const icon = document.getElementById('theme-icon');
-  if (icon) icon.className = isLight ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-  localStorage.setItem('icder-kurban-tema', isLight ? 'light' : 'dark');
+  modalTemaSecim();
+}
+
+function modalTemaSecim() {
+  const mevcutTema = localStorage.getItem('icder-kurban-tema') || 'dark';
+  const temaButonlari = TEMALAR.map(t => {
+    const secili = t.id === mevcutTema ? 'style="border:2px solid var(--accent);box-shadow:0 0 12px var(--glow)"' : '';
+    return `
+      <button class="btn btn-secondary" onclick="temaDegistir('${t.id}')" ${secili} style="min-width:140px;padding:14px 20px;font-size:15px">
+        <i class="fa-solid fa-palette"></i> ${t.name}
+      </button>
+    `;
+  }).join('');
+
+  openModal('Tema Seçin', `
+    <div style="text-align:center;padding:20px 0">
+      <p style="color:var(--text2);margin-bottom:24px;font-size:14px">Uygulamanın görünümünü değiştirin:</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        ${temaButonlari}
+      </div>
+    </div>
+  `, false, 'palette');
+}
+
+function temaDegistir(temaId) {
+  const tema = TEMALAR.find(t => t.id === temaId);
+  if (!tema) return;
+
+  // Tüm tema classlarını kaldır
+  TEMALAR.forEach(t => {
+    if (t.class) document.body.classList.remove(t.class);
+  });
+
+  // Yeni temayı uygula
+  if (tema.class) {
+    document.body.classList.add(tema.class);
+  }
+
+  localStorage.setItem('icder-kurban-tema', temaId);
+  closeModal();
+  toast(`${tema.name} teması uygulandı`);
 }
 
 // Sayfa yüklenince kayıtlı temayı uygula
 (function initTheme() {
-  const saved = localStorage.getItem('icder-kurban-tema');
-  if (saved === 'light') {
-    document.body.classList.add('light');
-    const icon = document.getElementById('theme-icon');
-    if (icon) icon.className = 'fa-solid fa-sun';
+  const saved = localStorage.getItem('icder-kurban-tema') || 'dark';
+  const tema = TEMALAR.find(t => t.id === saved);
+  if (tema && tema.class) {
+    document.body.classList.add(tema.class);
   }
 })();
 
