@@ -6,6 +6,7 @@ let _kullaniciAdi = 'İÇDER';
 // Direkt başlat
 (async function init() {
   await yukleKullaniciAyarlar();
+  await gosterAgBilgileri();
 })();
 
 async function yukleKullaniciAyarlar() {
@@ -16,6 +17,33 @@ async function yukleKullaniciAyarlar() {
       setTimeout(() => modalKurulumSihirbazi(), 600);
     }
   } catch(e) {}
+}
+
+// ─── AĞ BİLGİLERİNİ GÖSTER ───────────────────────────────────────────────────
+async function gosterAgBilgileri() {
+  try {
+    const data = await api('GET', '/sistem/ip');
+    if (data.ips && data.ips.length > 0) {
+      const ipListesi = data.ips.map(info => `<div style="margin:4px 0;font-family:monospace">http://${info.ip}:4500</div>`).join('');
+      toast(`
+        <div style="text-align:left">
+          <div style="font-weight:600;margin-bottom:8px;font-size:14px">
+            <i class="fa-solid fa-wifi" style="color:#4f7ef8;margin-right:6px"></i>
+            Ağ Üzerinden Erişim Aktif
+          </div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.8);margin-bottom:8px">
+            Aynı WiFi ağındaki cihazlardan bu adreslere erişebilirsiniz:
+          </div>
+          ${ipListesi}
+          <div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,0.6);border-top:1px solid rgba(255,255,255,0.1);padding-top:8px">
+            <i class="fa-solid fa-shield-halved"></i> Veriler güvenli bir şekilde saklanır ve asla silinmez
+          </div>
+        </div>
+      `, 'success', 8000);
+    }
+  } catch(e) {
+    console.log('Ağ bilgileri alınamadı:', e);
+  }
 }
 
 // ─── KURULUM SİHİRBAZI ───────────────────────────────────────────────────────
@@ -189,14 +217,130 @@ function showPage(page) {
   document.querySelectorAll('.sidebar-item').forEach(el =>
     el.classList.toggle('active', el.dataset.page === page));
   document.getElementById('main-content').innerHTML = '';
-  if (page==='organizasyonlar') renderOrganizasyonlar();
+  if (page==='organizasyonlar' || page==='kurban-organizasyonu') renderOrganizasyonlar();
   else if (page==='kurbanlar')   renderKurbanlar();
   else if (page==='bagiscilar')  renderBagiscilar();
   else if (page==='raporlar')    renderRaporlar();
+  else if (page==='hissedar-raporlari') renderHissedarRaporlari();
+  else if (page==='su-kuyusu-raporlari') renderSuKuyusuRaporlari();
+  else if (page==='bagisci-raporlari') renderBagisciRaporlari();
+  else if (page==='ihtiyac-sahibi-raporlari') renderIhtiyacSahibiRaporlari();
+  else if (page==='tahsilat-raporlari') renderTahsilatRaporlari();
+  else if (page==='banka-servisleri') renderBankaServisleri();
+  else if (page==='sponsor-periyot-raporlari') renderSponsorPeriyotRaporlari();
+  else if (page==='profil-bilgilerim') renderProfilBilgilerim();
+  else if (page==='ozel-mesajlar') renderOzelMesajlar();
+  else if (page==='gorev-bildirimlerim') renderGorevBildirimlerim();
+  else if (page==='destek') renderDestekHatti();
   else if (page==='cop')         renderCopKutusu();
   else if (page==='yedek')       renderYedekGeriYukle();
   else if (page==='denetim')     renderDenetim();
   else if (page==='medya')       renderMedyaDeposu();
+  else if (page==='bagis-turleri') renderBagisTurleri();
+  else if (page==='bagis-raporlari') renderBagisRaporlari();
+  else if (page==='bagisci-yonetimi') renderBagisciYonetimi();
+  else if (page==='bagis-al') renderBagisAl();
+  else if (page==='gonullu-yonetimi') renderGonulluYonetimi();
+  else if (page==='kumbara-talepleri') renderKumbaraTalepleri();
+  else if (page==='web-sitesi-bagislari') renderWebSitesiBagislari();
+  else if (page==='kategori-tanimlari') renderKategoriTanimlari();
+  else if (page==='urun-tanimlari') renderUrunTanimlari();
+  else if (page==='stok-girisi') renderStokGirisi();
+  else if (page==='stok-cikisi') renderStokCikisi();
+  else if (page==='fatura-raporlari') renderFaturaRaporlari();
+  else if (page==='depo-sayimi') renderDepoSayimi();
+  else if (page==='yardim-raporlari') renderYardimRaporlari();
+  else if (page==='basvuru-dosyalari') renderBasvuruDosyalari();
+  else if (page==='yetim-oksuz-yonetimi') renderYetimOksuzYonetimi();
+  else if (page==='ihtiyac-sahibi-listesi') renderIhtiyacSahibiListesi();
+  else if (page==='su-kuyusu-organizasyonu') renderSuKuyusuOrganizasyonu();
+  else if (page==='proje-yonetimi') renderProjeYonetimi();
+  else if (page==='diger-organizasyonlar') renderDigerOrganizasyonlar();
+  else if (page==='partner-kurum-listesi') renderPartnerKurumListesi();
+}
+
+function toggleBagisMenu() {
+  const submenu = document.getElementById('bagis-submenu');
+  const chevron = document.getElementById('bagis-chevron');
+  if (submenu.style.display === 'none') {
+    submenu.style.display = 'block';
+    chevron.style.transform = 'rotate(180deg)';
+  } else {
+    submenu.style.display = 'none';
+    chevron.style.transform = 'rotate(0deg)';
+  }
+}
+
+function toggleDepoStokMenu() {
+  const submenu = document.getElementById('depo-stok-submenu');
+  const chevron = document.getElementById('depo-stok-chevron');
+  if (submenu.style.display === 'none') {
+    submenu.style.display = 'block';
+    chevron.style.transform = 'rotate(180deg)';
+  } else {
+    submenu.style.display = 'none';
+    chevron.style.transform = 'rotate(0deg)';
+  }
+}
+
+function toggleYardimMenu() {
+  const submenu = document.getElementById('yardim-submenu');
+  const chevron = document.getElementById('yardim-chevron');
+  if (submenu.style.display === 'none') {
+    submenu.style.display = 'block';
+    chevron.style.transform = 'rotate(180deg)';
+  } else {
+    submenu.style.display = 'none';
+    chevron.style.transform = 'rotate(0deg)';
+  }
+}
+
+function toggleOrganizasyonMenu() {
+  const submenu = document.getElementById('organizasyon-submenu');
+  const chevron = document.getElementById('organizasyon-chevron');
+  if (submenu.style.display === 'none') {
+    submenu.style.display = 'block';
+    chevron.style.transform = 'rotate(180deg)';
+  } else {
+    submenu.style.display = 'none';
+    chevron.style.transform = 'rotate(0deg)';
+  }
+}
+
+function toggleRaporlarMenu() {
+  const submenu = document.getElementById('raporlar-submenu');
+  const chevron = document.getElementById('raporlar-chevron');
+  if (submenu.style.display === 'none') {
+    submenu.style.display = 'block';
+    chevron.style.transform = 'rotate(180deg)';
+  } else {
+    submenu.style.display = 'none';
+    chevron.style.transform = 'rotate(0deg)';
+  }
+}
+
+function toggleKisiselMenu() {
+  const submenu = document.getElementById('kisisel-submenu');
+  const chevron = document.getElementById('kisisel-chevron');
+  if (submenu.style.display === 'none') {
+    submenu.style.display = 'block';
+    chevron.style.transform = 'rotate(180deg)';
+  } else {
+    submenu.style.display = 'none';
+    chevron.style.transform = 'rotate(0deg)';
+  }
+}
+
+function togglePartnerMenu() {
+  const submenu = document.getElementById('partner-submenu');
+  const chevron = document.getElementById('partner-chevron');
+  if (submenu.style.display === 'none') {
+    submenu.style.display = 'block';
+    chevron.style.transform = 'rotate(180deg)';
+  } else {
+    submenu.style.display = 'none';
+    chevron.style.transform = 'rotate(0deg)';
+  }
 }
 
 function setSidebarOrg(ad, yil) {
@@ -421,11 +565,19 @@ async function loadDashStats() {
   try {
     const d = await api('GET',`/organizasyonlar/${S.orgId}/dashboard`);
     document.getElementById('dash-stats').innerHTML = `
-      <div class="stat-card blue"><div class="stat-icon"><i class="fa-solid fa-cow"></i></div><div class="stat-value">${d.toplam_kurban}</div><div class="stat-label">Toplam Kurban</div></div>
-      <div class="stat-card green"><div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div><div class="stat-value">${d.dolu_hisse}</div><div class="stat-label">Dolu Hisse</div></div>
-      <div class="stat-card yellow"><div class="stat-icon"><i class="fa-solid fa-circle-half-stroke"></i></div><div class="stat-value">${d.bos_hisse}</div><div class="stat-label">Bos Hisse</div></div>
-      <div class="stat-card red"><div class="stat-icon"><i class="fa-solid fa-scissors"></i></div><div class="stat-value">${d.kesildi}</div><div class="stat-label">Kesildi</div></div>
-      <div class="stat-card purple"><div class="stat-icon"><i class="fa-solid fa-check-double"></i></div><div class="stat-value">${d.doldu_kurban}</div><div class="stat-label">Hisseleri Dolu</div></div>`;
+      <div class="stat-card blue"><div class="stat-icon"><i class="fa-solid fa-heart"></i></div><div class="stat-value">${d.toplam_bagis || 0} ₺</div><div class="stat-label">Toplam Bağış</div></div>
+      <div class="stat-card yellow"><div class="stat-icon"><i class="fa-solid fa-gift"></i></div><div class="stat-value">${d.kumbara_tahsilat || 0} ₺</div><div class="stat-label">Kumbara Tahsilat</div></div>
+      <div class="stat-card purple"><div class="stat-icon"><i class="fa-solid fa-receipt"></i></div><div class="stat-value">${d.kumbara_adet || 0} Adet</div><div class="stat-label">Kumbara</div></div>
+      <div class="stat-card green"><div class="stat-icon"><i class="fa-solid fa-seedling"></i></div><div class="stat-value">${d.sponsor_tahsilat || 0} ₺</div><div class="stat-label">Sponsor Tahsilat</div></div>
+      
+      <div class="stat-card blue"><div class="stat-icon"><i class="fa-solid fa-file-alt"></i></div><div class="stat-value">${d.toplam_personel || 1} Adet</div><div class="stat-label">Toplam Personel</div></div>
+      <div class="stat-card red"><div class="stat-icon"><i class="fa-solid fa-users"></i></div><div class="stat-value">${d.bagisci || 59} Adet</div><div class="stat-label">Bağışçı</div></div>
+      <div class="stat-card blue"><div class="stat-icon"><i class="fa-solid fa-building"></i></div><div class="stat-value">${d.faydalanıcı || 1} Adet</div><div class="stat-label">Faydalanıcı</div></div>
+      <div class="stat-card green"><div class="stat-icon"><i class="fa-solid fa-user-friends"></i></div><div class="stat-value">${d.sponsor || 1} Adet</div><div class="stat-label">Sponsor</div></div>
+      
+      <div class="stat-card blue"><div class="stat-icon"><i class="fa-solid fa-list"></i></div><div class="stat-value">${d.bekleyen_kurban_hisse || 0} Adet</div><div class="stat-label">Bekleyen Kurban Hisse</div></div>
+      <div class="stat-card red"><div class="stat-icon"><i class="fa-solid fa-align-justify"></i></div><div class="stat-value">${d.bekleyen_su_kuyusu || 1} Adet</div><div class="stat-label">Bekleyen Su Kuyusu</div></div>
+      <div class="stat-card blue"><div class="stat-icon"><i class="fa-solid fa-cog"></i></div><div class="stat-value">${d.bekleyen_diger_org || 0} Adet</div><div class="stat-label">Bekleyen Diğer Org.</div></div>`;
   } catch(e) {}
 }
 
@@ -1179,7 +1331,6 @@ function yazdirilabilirHTML(tip) {
     (icerik ? icerik.innerHTML : '') +
     '<div class="footer">' +
     '<div class="footer-left">İÇDER</div>' +
-    '<div class="footer-right">Created by İsmail Demircan</div>' +
     '</div>' +
     '</body></html>';
 }
@@ -1263,7 +1414,6 @@ function kurbanYazdirHTML(kurbanNo, tur, hisseler, kurbanData, orientation = 'po
     '</table>' +
     '<div class="footer">' +
     '<div class="footer-left">İÇDER</div>' +
-    '<div class="footer-right">Created by İsmail Demircan</div>' +
     '</div>' +
     '</body></html>';
 }
@@ -2235,4 +2385,2343 @@ function handleHisseDrop(e, folder) {
   document.getElementById('upload-zone').classList.remove('drag-over');
   const file = e.dataTransfer.files[0];
   if (file) yukleSeciliDosya(file, folder);
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BAĞIŞ YÖNETİMİ
+// ═══════════════════════════════════════════════════════════════════════════
+
+function renderBagisTurleri() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-list"></i></div>
+        Bağış Türleri
+      </div>
+      <button class="btn btn-primary" onclick="modalYeniBagisTuru()">
+        <i class="fa-solid fa-plus"></i> Yeni Bağış Türü
+      </button>
+    </div>
+    <div class="card">
+      <div class="empty-state">
+        <i class="fa-solid fa-list"></i>
+        <p>Bağış türleri yönetimi geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+function renderBagisRaporlari() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-chart-line"></i></div>
+        Bağış Raporları
+      </div>
+      <button class="btn btn-primary" onclick="exportBagisRaporu()">
+        <i class="fa-solid fa-file-excel"></i> Excel İndir
+      </button>
+    </div>
+    <div class="card">
+      <div class="empty-state">
+        <i class="fa-solid fa-chart-line"></i>
+        <p>Bağış raporları geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+function renderBagisciYonetimi() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-user-tie"></i></div>
+        Bağışçı Yönetimi
+      </div>
+      <button class="btn btn-primary" onclick="modalYeniBagisci()">
+        <i class="fa-solid fa-plus"></i> Yeni Bağışçı
+      </button>
+    </div>
+    <div class="card">
+      <div class="empty-state">
+        <i class="fa-solid fa-user-tie"></i>
+        <p>Bağışçı yönetimi geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+function renderBagisAl() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-hand-holding-heart"></i></div>
+        Bağış Al
+      </div>
+    </div>
+    <div class="card">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Bağışçı Seç</label>
+          <select id="bagis-bagisci">
+            <option value="">Bağışçı seçin...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Bağış Türü</label>
+          <select id="bagis-tur">
+            <option value="nakit">Nakit</option>
+            <option value="kumbara">Kumbara</option>
+            <option value="online">Online</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tutar (TL)</label>
+          <input type="number" id="bagis-tutar" placeholder="0.00"/>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Not</label>
+          <textarea id="bagis-not" placeholder="Opsiyonel..."></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="kaydetBagis()">
+          <i class="fa-solid fa-floppy-disk"></i> Bağışı Kaydet
+        </button>
+      </div>
+    </div>`;
+}
+
+function renderGonulluYonetimi() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-hands-helping"></i></div>
+        Gönüllü Yönetimi
+      </div>
+      <button class="btn btn-primary" onclick="modalYeniGonullu()">
+        <i class="fa-solid fa-plus"></i> Yeni Gönüllü
+      </button>
+    </div>
+    <div class="card">
+      <div class="empty-state">
+        <i class="fa-solid fa-hands-helping"></i>
+        <p>Gönüllü yönetimi geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+function renderKumbaraTalepleri() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-piggy-bank"></i></div>
+        Kumbara Talepleri
+      </div>
+      <button class="btn btn-primary" onclick="modalYeniKumbaraTalebi()">
+        <i class="fa-solid fa-plus"></i> Yeni Talep
+      </button>
+    </div>
+    <div class="card">
+      <div class="empty-state">
+        <i class="fa-solid fa-piggy-bank"></i>
+        <p>Kumbara talepleri geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+function renderWebSitesiBagislari() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-globe"></i></div>
+        Web Sitesi Bağışları
+      </div>
+      <button class="btn btn-secondary" onclick="senkronizeEtBagislar()">
+        <i class="fa-solid fa-sync"></i> Senkronize Et
+      </button>
+    </div>
+    <div class="card">
+      <div class="empty-state">
+        <i class="fa-solid fa-globe"></i>
+        <p>Web sitesi bağışları geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+// Placeholder fonksiyonlar
+function modalYeniBagisTuru() {
+  toast('Bağış türü ekleme özelliği yakında eklenecek', 'info');
+}
+
+function modalYeniBagisci() {
+  toast('Bağışçı ekleme özelliği yakında eklenecek', 'info');
+}
+
+function kaydetBagis() {
+  toast('Bağış kaydetme özelliği yakında eklenecek', 'info');
+}
+
+function modalYeniGonullu() {
+  toast('Gönüllü ekleme özelliği yakında eklenecek', 'info');
+}
+
+function modalYeniKumbaraTalebi() {
+  toast('Kumbara talebi ekleme özelliği yakında eklenecek', 'info');
+}
+
+function senkronizeEtBagislar() {
+  toast('Senkronizasyon özelliği yakında eklenecek', 'info');
+}
+
+function exportBagisRaporu() {
+  toast('Rapor indirme özelliği yakında eklenecek', 'info');
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DEPO/STOK YÖNETİMİ
+// ═══════════════════════════════════════════════════════════════════════════
+
+function renderKategoriTanimlari() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-tags"></i></div>
+        Kategori Tanımları
+      </div>
+      <button class="btn btn-primary" onclick="modalYeniKategori()">
+        <i class="fa-solid fa-plus"></i> Yeni Kategori
+      </button>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Kategori Adı</th>
+              <th>Açıklama</th>
+              <th>Ürün Sayısı</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="5">
+                <div class="empty-state">
+                  <i class="fa-solid fa-tags"></i>
+                  <p>Kategori tanımları geliştiriliyor...</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderUrunTanimlari() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-box"></i></div>
+        Ürün Tanımları
+      </div>
+      <button class="btn btn-primary" onclick="modalYeniUrun()">
+        <i class="fa-solid fa-plus"></i> Yeni Ürün
+      </button>
+    </div>
+    <div class="card">
+      <div class="filter-bar" style="margin-bottom:16px">
+        <input placeholder="Ürün ara..." oninput="filterUrunler()"/>
+        <select onchange="filterUrunler()">
+          <option value="">Tüm Kategoriler</option>
+          <option value="gida">Gıda</option>
+          <option value="temizlik">Temizlik</option>
+          <option value="kirtasiye">Kırtasiye</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Ürün Adı</th>
+              <th>Kategori</th>
+              <th>Birim</th>
+              <th>Stok Miktarı</th>
+              <th>Birim Fiyat</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="7">
+                <div class="empty-state">
+                  <i class="fa-solid fa-box"></i>
+                  <p>Ürün tanımları geliştiriliyor...</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderStokGirisi() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-arrow-down"></i></div>
+        Stok Girişi
+      </div>
+    </div>
+    <div class="card">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Ürün Seç *</label>
+          <select id="stok-giris-urun">
+            <option value="">Ürün seçin...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Miktar *</label>
+          <input type="number" id="stok-giris-miktar" placeholder="0"/>
+        </div>
+        <div class="form-group">
+          <label>Birim Fiyat (TL)</label>
+          <input type="number" id="stok-giris-fiyat" placeholder="0.00"/>
+        </div>
+        <div class="form-group">
+          <label>Tedarikçi</label>
+          <input id="stok-giris-tedarikci" placeholder="Tedarikçi adı"/>
+        </div>
+        <div class="form-group">
+          <label>Fatura No</label>
+          <input id="stok-giris-fatura" placeholder="Fatura numarası"/>
+        </div>
+        <div class="form-group">
+          <label>Tarih</label>
+          <input type="date" id="stok-giris-tarih" value="${new Date().toISOString().split('T')[0]}"/>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Not</label>
+          <textarea id="stok-giris-not" placeholder="Opsiyonel..."></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="kaydetStokGirisi()">
+          <i class="fa-solid fa-floppy-disk"></i> Stok Girişi Yap
+        </button>
+      </div>
+    </div>
+    
+    <div class="card" style="margin-top:20px">
+      <h3 style="margin-bottom:16px">Son Stok Girişleri</h3>
+      <div class="empty-state">
+        <i class="fa-solid fa-arrow-down"></i>
+        <p>Stok giriş geçmişi geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+function renderStokCikisi() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-arrow-up"></i></div>
+        Stok Çıkışı
+      </div>
+    </div>
+    <div class="card">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Ürün Seç *</label>
+          <select id="stok-cikis-urun">
+            <option value="">Ürün seçin...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Miktar *</label>
+          <input type="number" id="stok-cikis-miktar" placeholder="0"/>
+        </div>
+        <div class="form-group">
+          <label>Çıkış Nedeni *</label>
+          <select id="stok-cikis-neden">
+            <option value="satis">Satış</option>
+            <option value="bagis">Bağış</option>
+            <option value="fire">Fire</option>
+            <option value="iade">İade</option>
+            <option value="diger">Diğer</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Alıcı/Faydalanıcı</label>
+          <input id="stok-cikis-alici" placeholder="Alıcı adı"/>
+        </div>
+        <div class="form-group">
+          <label>Tarih</label>
+          <input type="date" id="stok-cikis-tarih" value="${new Date().toISOString().split('T')[0]}"/>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Not</label>
+          <textarea id="stok-cikis-not" placeholder="Opsiyonel..."></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="kaydetStokCikisi()">
+          <i class="fa-solid fa-floppy-disk"></i> Stok Çıkışı Yap
+        </button>
+      </div>
+    </div>
+    
+    <div class="card" style="margin-top:20px">
+      <h3 style="margin-bottom:16px">Son Stok Çıkışları</h3>
+      <div class="empty-state">
+        <i class="fa-solid fa-arrow-up"></i>
+        <p>Stok çıkış geçmişi geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+function renderFaturaRaporlari() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-file-invoice"></i></div>
+        Fatura Raporları
+      </div>
+      <button class="btn btn-primary" onclick="exportFaturaRaporu()">
+        <i class="fa-solid fa-file-excel"></i> Excel İndir
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-file-invoice"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Toplam Fatura</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-lira-sign"></i></div>
+        <div class="stat-value">0 ₺</div>
+        <div class="stat-label">Toplam Tutar</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Bekleyen</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon"><i class="fa-solid fa-exclamation-triangle"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Gecikmiş</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="filter-bar" style="margin-bottom:16px">
+        <input placeholder="Fatura ara..." />
+        <select>
+          <option value="">Tüm Durumlar</option>
+          <option value="odendi">Ödendi</option>
+          <option value="bekliyor">Bekliyor</option>
+          <option value="gecikti">Gecikti</option>
+        </select>
+        <input type="date" placeholder="Başlangıç"/>
+        <input type="date" placeholder="Bitiş"/>
+      </div>
+      <div class="empty-state">
+        <i class="fa-solid fa-file-invoice"></i>
+        <p>Fatura raporları geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+function renderDepoSayimi() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-clipboard-check"></i></div>
+        Depo Sayımı
+      </div>
+      <button class="btn btn-primary" onclick="modalYeniSayim()">
+        <i class="fa-solid fa-plus"></i> Yeni Sayım Başlat
+      </button>
+    </div>
+    
+    <div class="card">
+      <div class="stats-grid" style="margin-bottom:20px">
+        <div class="stat-card blue">
+          <div class="stat-icon"><i class="fa-solid fa-box"></i></div>
+          <div class="stat-value">0</div>
+          <div class="stat-label">Toplam Ürün</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon"><i class="fa-solid fa-check-circle"></i></div>
+          <div class="stat-value">0</div>
+          <div class="stat-label">Sayıldı</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+          <div class="stat-value">0</div>
+          <div class="stat-label">Bekliyor</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-icon"><i class="fa-solid fa-exclamation-circle"></i></div>
+          <div class="stat-value">0</div>
+          <div class="stat-label">Fark Var</div>
+        </div>
+      </div>
+      
+      <div class="empty-state">
+        <i class="fa-solid fa-clipboard-check"></i>
+        <p>Depo sayımı geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+// Placeholder fonksiyonlar
+function modalYeniKategori() {
+  toast('Kategori ekleme özelliği yakında eklenecek', 'info');
+}
+
+function modalYeniUrun() {
+  toast('Ürün ekleme özelliği yakında eklenecek', 'info');
+}
+
+function filterUrunler() {
+  // Ürün filtreleme
+}
+
+function kaydetStokGirisi() {
+  toast('Stok girişi özelliği yakında eklenecek', 'info');
+}
+
+function kaydetStokCikisi() {
+  toast('Stok çıkışı özelliği yakında eklenecek', 'info');
+}
+
+function exportFaturaRaporu() {
+  toast('Fatura raporu indirme özelliği yakında eklenecek', 'info');
+}
+
+function modalYeniSayim() {
+  toast('Sayım başlatma özelliği yakında eklenecek', 'info');
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// YARDIM YÖNETİMİ
+// ═══════════════════════════════════════════════════════════════════════════
+
+function renderYardimRaporlari() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-chart-pie"></i></div>
+        Yardım Raporları
+      </div>
+      <button class="btn btn-primary" onclick="exportYardimRaporu()">
+        <i class="fa-solid fa-file-excel"></i> Excel İndir
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-hands-helping"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Toplam Yardım</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-check-circle"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Tamamlanan</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Devam Eden</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Faydalanan Kişi</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="filter-bar" style="margin-bottom:16px">
+        <input placeholder="Rapor ara..." />
+        <select>
+          <option value="">Tüm Yardım Türleri</option>
+          <option value="gida">Gıda Yardımı</option>
+          <option value="egitim">Eğitim Yardımı</option>
+          <option value="saglik">Sağlık Yardımı</option>
+          <option value="nakit">Nakit Yardım</option>
+        </select>
+        <input type="date" placeholder="Başlangıç"/>
+        <input type="date" placeholder="Bitiş"/>
+      </div>
+      <div class="empty-state">
+        <i class="fa-solid fa-chart-pie"></i>
+        <p>Yardım raporları geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+function renderBasvuruDosyalari() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-folder-open"></i></div>
+        Başvuru Dosyaları
+      </div>
+      <button class="btn btn-primary" onclick="modalYeniBasvuru()">
+        <i class="fa-solid fa-plus"></i> Yeni Başvuru
+      </button>
+    </div>
+    
+    <div class="card">
+      <div class="filter-bar" style="margin-bottom:16px">
+        <input placeholder="Başvuru ara..." oninput="filterBasvurular()"/>
+        <select onchange="filterBasvurular()">
+          <option value="">Tüm Durumlar</option>
+          <option value="beklemede">Beklemede</option>
+          <option value="inceleniyor">İnceleniyor</option>
+          <option value="onaylandi">Onaylandı</option>
+          <option value="reddedildi">Reddedildi</option>
+        </select>
+        <select onchange="filterBasvurular()">
+          <option value="">Tüm Türler</option>
+          <option value="gida">Gıda Yardımı</option>
+          <option value="egitim">Eğitim Yardımı</option>
+          <option value="saglik">Sağlık Yardımı</option>
+          <option value="nakit">Nakit Yardım</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Başvuru No</th>
+              <th>Ad Soyad</th>
+              <th>Yardım Türü</th>
+              <th>Başvuru Tarihi</th>
+              <th>Durum</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="7">
+                <div class="empty-state">
+                  <i class="fa-solid fa-folder-open"></i>
+                  <p>Başvuru dosyaları geliştiriliyor...</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderYetimOksuzYonetimi() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-child"></i></div>
+        Yetim-Öksüz Yönetimi
+      </div>
+      <button class="btn btn-primary" onclick="modalYeniYetim()">
+        <i class="fa-solid fa-plus"></i> Yeni Kayıt
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-child"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Toplam Kayıt</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Eğitim Desteği</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-heart"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Sağlık Desteği</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon"><i class="fa-solid fa-home"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Barınma Desteği</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="filter-bar" style="margin-bottom:16px">
+        <input placeholder="İsim ara..." oninput="filterYetimler()"/>
+        <select onchange="filterYetimler()">
+          <option value="">Tüm Yaş Grupları</option>
+          <option value="0-6">0-6 Yaş</option>
+          <option value="7-12">7-12 Yaş</option>
+          <option value="13-18">13-18 Yaş</option>
+        </select>
+        <select onchange="filterYetimler()">
+          <option value="">Tüm Durumlar</option>
+          <option value="aktif">Aktif</option>
+          <option value="pasif">Pasif</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Ad Soyad</th>
+              <th>Yaş</th>
+              <th>Veli/Vasi</th>
+              <th>Telefon</th>
+              <th>Destek Türü</th>
+              <th>Durum</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="8">
+                <div class="empty-state">
+                  <i class="fa-solid fa-child"></i>
+                  <p>Yetim-öksüz yönetimi geliştiriliyor...</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderIhtiyacSahibiListesi() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-users"></i></div>
+        İhtiyaç Sahibi Kişi Listesi
+      </div>
+      <button class="btn btn-primary" onclick="modalYeniIhtiyacSahibi()">
+        <i class="fa-solid fa-plus"></i> Yeni Kişi Ekle
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Toplam Kişi</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-check-circle"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Yardım Alanlar</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Bekleyenler</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon"><i class="fa-solid fa-exclamation-triangle"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Acil Durum</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="filter-bar" style="margin-bottom:16px">
+        <input placeholder="İsim, TC No ara..." oninput="filterIhtiyacSahibi()"/>
+        <select onchange="filterIhtiyacSahibi()">
+          <option value="">Tüm İhtiyaç Türleri</option>
+          <option value="gida">Gıda</option>
+          <option value="giyim">Giyim</option>
+          <option value="egitim">Eğitim</option>
+          <option value="saglik">Sağlık</option>
+          <option value="nakit">Nakit</option>
+        </select>
+        <select onchange="filterIhtiyacSahibi()">
+          <option value="">Tüm Öncelikler</option>
+          <option value="acil">Acil</option>
+          <option value="yuksek">Yüksek</option>
+          <option value="orta">Orta</option>
+          <option value="dusuk">Düşük</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Ad Soyad</th>
+              <th>TC No</th>
+              <th>Telefon</th>
+              <th>Adres</th>
+              <th>İhtiyaç Türü</th>
+              <th>Öncelik</th>
+              <th>Son Yardım</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="9">
+                <div class="empty-state">
+                  <i class="fa-solid fa-users"></i>
+                  <p>İhtiyaç sahibi listesi geliştiriliyor...</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+// Placeholder fonksiyonlar
+function exportYardimRaporu() {
+  toast('Yardım raporu indirme özelliği yakında eklenecek', 'info');
+}
+
+function modalYeniBasvuru() {
+  toast('Başvuru ekleme özelliği yakında eklenecek', 'info');
+}
+
+function filterBasvurular() {
+  // Başvuru filtreleme
+}
+
+function modalYeniYetim() {
+  toast('Yetim kaydı ekleme özelliği yakında eklenecek', 'info');
+}
+
+function filterYetimler() {
+  // Yetim filtreleme
+}
+
+function modalYeniIhtiyacSahibi() {
+  toast('İhtiyaç sahibi ekleme özelliği yakında eklenecek', 'info');
+}
+
+function filterIhtiyacSahibi() {
+  // İhtiyaç sahibi filtreleme
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ORGANİZASYON YÖNETİMİ
+// ═══════════════════════════════════════════════════════════════════════════
+
+function renderSuKuyusuOrganizasyonu() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-water"></i></div>
+        Su Kuyusu Organizasyonu
+      </div>
+      <button class="btn btn-primary" onclick="modalYeniSuKuyusu()">
+        <i class="fa-solid fa-plus"></i> Yeni Su Kuyusu
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-water"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Toplam Kuyu</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-check-circle"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Tamamlanan</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Devam Eden</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon"><i class="fa-solid fa-lira-sign"></i></div>
+        <div class="stat-value">0 ₺</div>
+        <div class="stat-label">Toplam Bütçe</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="filter-bar" style="margin-bottom:16px">
+        <input placeholder="Kuyu ara..." oninput="filterSuKuyusu()"/>
+        <select onchange="filterSuKuyusu()">
+          <option value="">Tüm Durumlar</option>
+          <option value="planlama">Planlama</option>
+          <option value="devam">Devam Ediyor</option>
+          <option value="tamamlandi">Tamamlandı</option>
+        </select>
+        <select onchange="filterSuKuyusu()">
+          <option value="">Tüm Ülkeler</option>
+          <option value="afrika">Afrika</option>
+          <option value="asya">Asya</option>
+          <option value="ortadogu">Orta Doğu</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Kuyu Adı</th>
+              <th>Konum</th>
+              <th>Bütçe</th>
+              <th>Toplanan</th>
+              <th>Durum</th>
+              <th>Başlangıç</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="8">
+                <div class="empty-state">
+                  <i class="fa-solid fa-water"></i>
+                  <p>Su kuyusu organizasyonu geliştiriliyor...</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderProjeYonetimi() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-project-diagram"></i></div>
+        Proje Yönetimi
+      </div>
+      <button class="btn btn-primary" onclick="modalYeniProje()">
+        <i class="fa-solid fa-plus"></i> Yeni Proje
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-project-diagram"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Toplam Proje</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-check-circle"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Tamamlanan</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-spinner"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Devam Eden</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon"><i class="fa-solid fa-pause-circle"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Beklemede</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="filter-bar" style="margin-bottom:16px">
+        <input placeholder="Proje ara..." oninput="filterProjeler()"/>
+        <select onchange="filterProjeler()">
+          <option value="">Tüm Kategoriler</option>
+          <option value="egitim">Eğitim</option>
+          <option value="saglik">Sağlık</option>
+          <option value="altyapi">Alt Yapı</option>
+          <option value="sosyal">Sosyal</option>
+        </select>
+        <select onchange="filterProjeler()">
+          <option value="">Tüm Durumlar</option>
+          <option value="planlama">Planlama</option>
+          <option value="devam">Devam Ediyor</option>
+          <option value="tamamlandi">Tamamlandı</option>
+          <option value="beklemede">Beklemede</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Proje Adı</th>
+              <th>Kategori</th>
+              <th>Bütçe</th>
+              <th>Harcanan</th>
+              <th>İlerleme</th>
+              <th>Durum</th>
+              <th>Sorumlu</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="9">
+                <div class="empty-state">
+                  <i class="fa-solid fa-project-diagram"></i>
+                  <p>Proje yönetimi geliştiriliyor...</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderDigerOrganizasyonlar() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-sitemap"></i></div>
+        Diğer Organizasyonlar
+      </div>
+      <button class="btn btn-primary" onclick="modalYeniDigerOrganizasyon()">
+        <i class="fa-solid fa-plus"></i> Yeni Organizasyon
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-sitemap"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Toplam Organizasyon</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Aktif</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Planlanan</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon"><i class="fa-solid fa-archive"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Arşivlenen</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="filter-bar" style="margin-bottom:16px">
+        <input placeholder="Organizasyon ara..." oninput="filterDigerOrg()"/>
+        <select onchange="filterDigerOrg()">
+          <option value="">Tüm Türler</option>
+          <option value="etkinlik">Etkinlik</option>
+          <option value="kampanya">Kampanya</option>
+          <option value="yardim">Yardım Kampanyası</option>
+          <option value="egitim">Eğitim Programı</option>
+        </select>
+        <select onchange="filterDigerOrg()">
+          <option value="">Tüm Durumlar</option>
+          <option value="aktif">Aktif</option>
+          <option value="planlanan">Planlanan</option>
+          <option value="tamamlandi">Tamamlandı</option>
+          <option value="iptal">İptal Edildi</option>
+        </select>
+      </div>
+      <div class="org-grid" id="diger-org-grid">
+        <div class="empty-state">
+          <i class="fa-solid fa-sitemap"></i>
+          <p>Diğer organizasyonlar geliştiriliyor...</p>
+        </div>
+      </div>
+    </div>`;
+}
+
+// Placeholder fonksiyonlar
+function modalYeniSuKuyusu() {
+  toast('Su kuyusu ekleme özelliği yakında eklenecek', 'info');
+}
+
+function filterSuKuyusu() {
+  // Su kuyusu filtreleme
+}
+
+function modalYeniProje() {
+  toast('Proje ekleme özelliği yakında eklenecek', 'info');
+}
+
+function filterProjeler() {
+  // Proje filtreleme
+}
+
+function modalYeniDigerOrganizasyon() {
+  toast('Organizasyon ekleme özelliği yakında eklenecek', 'info');
+}
+
+function filterDigerOrg() {
+  // Diğer organizasyon filtreleme
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RAPOR YÖNETİMİ
+// ═══════════════════════════════════════════════════════════════════════════
+
+function renderHissedarRaporlari() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-users"></i></div>
+        Hissedar Raporları
+      </div>
+      <button class="btn btn-primary" onclick="exportHissedarRaporu()">
+        <i class="fa-solid fa-file-excel"></i> Excel İndir
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Toplam Hissedar</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-check-circle"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Ödeme Yapan</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Bekleyen</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon"><i class="fa-solid fa-lira-sign"></i></div>
+        <div class="stat-value">0 ₺</div>
+        <div class="stat-label">Toplam Tutar</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="filter-bar" style="margin-bottom:16px">
+        <input placeholder="Hissedar ara..." />
+        <select>
+          <option value="">Tüm Organizasyonlar</option>
+        </select>
+        <input type="date" placeholder="Başlangıç"/>
+        <input type="date" placeholder="Bitiş"/>
+      </div>
+      <div class="empty-state">
+        <i class="fa-solid fa-users"></i>
+        <p>Hissedar raporları geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+function renderSuKuyusuRaporlari() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-water"></i></div>
+        Su Kuyusu Raporları
+      </div>
+      <button class="btn btn-primary" onclick="exportSuKuyusuRaporu()">
+        <i class="fa-solid fa-file-excel"></i> Excel İndir
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-water"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Toplam Kuyu</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-check-circle"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Tamamlanan</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-spinner"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Devam Eden</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon"><i class="fa-solid fa-lira-sign"></i></div>
+        <div class="stat-value">0 ₺</div>
+        <div class="stat-label">Toplam Bütçe</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="empty-state">
+        <i class="fa-solid fa-water"></i>
+        <p>Su kuyusu raporları geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+function renderBagisciRaporlari() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-user-tie"></i></div>
+        Bağışçı Raporları
+      </div>
+      <button class="btn btn-primary" onclick="exportBagisciRaporu()">
+        <i class="fa-solid fa-file-excel"></i> Excel İndir
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-user-tie"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Toplam Bağışçı</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-star"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Aktif Bağışçı</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Toplam Bağış</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon"><i class="fa-solid fa-lira-sign"></i></div>
+        <div class="stat-value">0 ₺</div>
+        <div class="stat-label">Toplam Tutar</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="filter-bar" style="margin-bottom:16px">
+        <input placeholder="Bağışçı ara..." />
+        <select>
+          <option value="">Tüm Bağış Türleri</option>
+          <option value="nakit">Nakit</option>
+          <option value="kumbara">Kumbara</option>
+          <option value="online">Online</option>
+        </select>
+        <input type="date" placeholder="Başlangıç"/>
+        <input type="date" placeholder="Bitiş"/>
+      </div>
+      <div class="empty-state">
+        <i class="fa-solid fa-user-tie"></i>
+        <p>Bağışçı raporları geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+function renderIhtiyacSahibiRaporlari() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-hands-helping"></i></div>
+        İhtiyaç Sahibi Raporları
+      </div>
+      <button class="btn btn-primary" onclick="exportIhtiyacSahibiRaporu()">
+        <i class="fa-solid fa-file-excel"></i> Excel İndir
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Toplam Kişi</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-check-circle"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Yardım Yapılan</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Bekleyen</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon"><i class="fa-solid fa-exclamation-triangle"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Acil Durum</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="empty-state">
+        <i class="fa-solid fa-hands-helping"></i>
+        <p>İhtiyaç sahibi raporları geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+function renderTahsilatRaporlari() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-money-bill-wave"></i></div>
+        Tahsilat Raporları
+      </div>
+      <button class="btn btn-primary" onclick="exportTahsilatRaporu()">
+        <i class="fa-solid fa-file-excel"></i> Excel İndir
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+        <div class="stat-value">0 ₺</div>
+        <div class="stat-label">Toplam Tahsilat</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-credit-card"></i></div>
+        <div class="stat-value">0 ₺</div>
+        <div class="stat-label">Kredi Kartı</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-money-bill"></i></div>
+        <div class="stat-value">0 ₺</div>
+        <div class="stat-label">Nakit</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon"><i class="fa-solid fa-university"></i></div>
+        <div class="stat-value">0 ₺</div>
+        <div class="stat-label">Banka Transferi</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="filter-bar" style="margin-bottom:16px">
+        <select>
+          <option value="">Tüm Ödeme Yöntemleri</option>
+          <option value="nakit">Nakit</option>
+          <option value="kredi-karti">Kredi Kartı</option>
+          <option value="banka">Banka Transferi</option>
+        </select>
+        <input type="date" placeholder="Başlangıç"/>
+        <input type="date" placeholder="Bitiş"/>
+      </div>
+      <div class="empty-state">
+        <i class="fa-solid fa-money-bill-wave"></i>
+        <p>Tahsilat raporları geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+function renderBankaServisleri() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-university"></i></div>
+        Banka Servisleri
+      </div>
+      <button class="btn btn-primary" onclick="senkronizeBanka()">
+        <i class="fa-solid fa-sync"></i> Senkronize Et
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-university"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Bağlı Banka</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-wallet"></i></div>
+        <div class="stat-value">0 ₺</div>
+        <div class="stat-label">Toplam Bakiye</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-exchange-alt"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Bugünkü İşlem</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-value">-</div>
+        <div class="stat-label">Son Senkronizasyon</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="empty-state">
+        <i class="fa-solid fa-university"></i>
+        <p>Banka servisleri geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+function renderSponsorPeriyotRaporlari() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-calendar-alt"></i></div>
+        Sponsor Periyot Raporları
+      </div>
+      <button class="btn btn-primary" onclick="exportSponsorPeriyotRaporu()">
+        <i class="fa-solid fa-file-excel"></i> Excel İndir
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-handshake"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Aktif Sponsor</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-lira-sign"></i></div>
+        <div class="stat-value">0 ₺</div>
+        <div class="stat-label">Aylık Toplam</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Bu Ay Ödenen</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon"><i class="fa-solid fa-exclamation-circle"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Gecikmiş</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="filter-bar" style="margin-bottom:16px">
+        <input placeholder="Sponsor ara..." />
+        <select>
+          <option value="">Tüm Periyotlar</option>
+          <option value="aylik">Aylık</option>
+          <option value="3aylik">3 Aylık</option>
+          <option value="6aylik">6 Aylık</option>
+          <option value="yillik">Yıllık</option>
+        </select>
+        <select>
+          <option value="">Tüm Durumlar</option>
+          <option value="aktif">Aktif</option>
+          <option value="beklemede">Beklemede</option>
+          <option value="gecikti">Gecikti</option>
+        </select>
+      </div>
+      <div class="empty-state">
+        <i class="fa-solid fa-calendar-alt"></i>
+        <p>Sponsor periyot raporları geliştiriliyor...</p>
+      </div>
+    </div>`;
+}
+
+// Placeholder fonksiyonlar
+function exportHissedarRaporu() {
+  toast('Hissedar raporu indirme özelliği yakında eklenecek', 'info');
+}
+
+function exportSuKuyusuRaporu() {
+  toast('Su kuyusu raporu indirme özelliği yakında eklenecek', 'info');
+}
+
+function exportBagisciRaporu() {
+  toast('Bağışçı raporu indirme özelliği yakında eklenecek', 'info');
+}
+
+function exportIhtiyacSahibiRaporu() {
+  toast('İhtiyaç sahibi raporu indirme özelliği yakında eklenecek', 'info');
+}
+
+function exportTahsilatRaporu() {
+  toast('Tahsilat raporu indirme özelliği yakında eklenecek', 'info');
+}
+
+function senkronizeBanka() {
+  toast('Banka senkronizasyonu özelliği yakında eklenecek', 'info');
+}
+
+function exportSponsorPeriyotRaporu() {
+  toast('Sponsor periyot raporu indirme özelliği yakında eklenecek', 'info');
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// KİŞİSEL YÖNETİMİ
+// ═══════════════════════════════════════════════════════════════════════════
+
+function renderProfilBilgilerim() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-user-circle"></i></div>
+        Profil Bilgilerim
+      </div>
+    </div>
+    
+    <div class="card">
+      <div style="display:flex;gap:30px;align-items:start">
+        <div style="text-align:center">
+          <div style="width:150px;height:150px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;margin-bottom:15px;border:3px solid var(--accent)">
+            <i class="fa-solid fa-user" style="font-size:60px;color:var(--text3)"></i>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="degistirProfilFoto()">
+            <i class="fa-solid fa-camera"></i> Fotoğraf Değiştir
+          </button>
+        </div>
+        
+        <div style="flex:1">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Ad Soyad *</label>
+              <input id="profil-adsoyad" value="İÇDER Kullanıcı" placeholder="Ad Soyad"/>
+            </div>
+            <div class="form-group">
+              <label>E-posta *</label>
+              <input id="profil-email" type="email" value="kullanici@icder.org" placeholder="E-posta"/>
+            </div>
+            <div class="form-group">
+              <label>Telefon</label>
+              <input id="profil-telefon" placeholder="0 (5__) ___ __ __"/>
+            </div>
+            <div class="form-group">
+              <label>Görev/Pozisyon</label>
+              <input id="profil-gorev" placeholder="Görev"/>
+            </div>
+            <div class="form-group" style="grid-column:1/-1">
+              <label>Biyografi</label>
+              <textarea id="profil-bio" rows="3" placeholder="Kendiniz hakkında kısa bilgi..."></textarea>
+            </div>
+          </div>
+          
+          <hr style="margin:20px 0;border:none;border-top:1px solid var(--border)"/>
+          
+          <h3 style="margin-bottom:15px;font-size:16px">Şifre Değiştir</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Mevcut Şifre</label>
+              <input id="profil-eski-sifre" type="password" placeholder="Mevcut şifre"/>
+            </div>
+            <div class="form-group">
+              <label>Yeni Şifre</label>
+              <input id="profil-yeni-sifre" type="password" placeholder="Yeni şifre"/>
+            </div>
+            <div class="form-group">
+              <label>Yeni Şifre Tekrar</label>
+              <input id="profil-yeni-sifre-tekrar" type="password" placeholder="Yeni şifre tekrar"/>
+            </div>
+          </div>
+          
+          <div class="form-actions" style="margin-top:20px">
+            <button class="btn btn-primary" onclick="kaydetProfilBilgileri()">
+              <i class="fa-solid fa-floppy-disk"></i> Değişiklikleri Kaydet
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderOzelMesajlar() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-envelope"></i></div>
+        Özel Mesajlar
+      </div>
+      <button class="btn btn-primary" onclick="modalYeniMesaj()">
+        <i class="fa-solid fa-plus"></i> Yeni Mesaj
+      </button>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:300px 1fr;gap:20px;height:calc(100vh - 200px)">
+      <div class="card" style="margin:0;overflow-y:auto">
+        <div style="margin-bottom:15px">
+          <input placeholder="Mesaj ara..." style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--text)"/>
+        </div>
+        
+        <div id="mesaj-listesi">
+          <div class="empty-state" style="padding:40px 20px">
+            <i class="fa-solid fa-envelope"></i>
+            <p style="font-size:13px">Mesaj bulunamadı</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card" style="margin:0;display:flex;flex-direction:column">
+        <div style="flex:1;overflow-y:auto;padding:20px;background:var(--bg3);border-radius:8px;margin-bottom:15px">
+          <div class="empty-state">
+            <i class="fa-solid fa-comments"></i>
+            <p>Bir mesaj seçin</p>
+          </div>
+        </div>
+        
+        <div style="display:flex;gap:10px">
+          <input placeholder="Mesajınızı yazın..." style="flex:1;padding:10px;border:1px solid var(--border);border-radius:6px;background:var(--bg3);color:var(--text)"/>
+          <button class="btn btn-primary">
+            <i class="fa-solid fa-paper-plane"></i> Gönder
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderGorevBildirimlerim() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-bell"></i></div>
+        Görev Bildirimlerim
+      </div>
+      <button class="btn btn-secondary" onclick="tumunuOkunduIsaretle()">
+        <i class="fa-solid fa-check-double"></i> Tümünü Okundu İşaretle
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-bell"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Toplam Bildirim</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon"><i class="fa-solid fa-envelope"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Okunmamış</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-tasks"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Bekleyen Görev</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-check-circle"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Tamamlanan</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="filter-bar" style="margin-bottom:16px">
+        <select onchange="filterBildirimler()">
+          <option value="">Tüm Bildirimler</option>
+          <option value="okunmamis">Okunmamış</option>
+          <option value="okunmus">Okunmuş</option>
+        </select>
+        <select onchange="filterBildirimler()">
+          <option value="">Tüm Türler</option>
+          <option value="gorev">Görev</option>
+          <option value="mesaj">Mesaj</option>
+          <option value="sistem">Sistem</option>
+          <option value="uyari">Uyarı</option>
+        </select>
+      </div>
+      
+      <div id="bildirim-listesi">
+        <div class="empty-state">
+          <i class="fa-solid fa-bell-slash"></i>
+          <p>Henüz bildirim yok</p>
+        </div>
+      </div>
+    </div>`;
+}
+
+// Placeholder fonksiyonlar
+function degistirProfilFoto() {
+  toast('Profil fotoğrafı değiştirme özelliği yakında eklenecek', 'info');
+}
+
+function kaydetProfilBilgileri() {
+  toast('Profil bilgileri kaydetme özelliği yakında eklenecek', 'info');
+}
+
+function modalYeniMesaj() {
+  toast('Yeni mesaj gönderme özelliği yakında eklenecek', 'info');
+}
+
+function tumunuOkunduIsaretle() {
+  toast('Tümünü okundu işaretleme özelliği yakında eklenecek', 'info');
+}
+
+function filterBildirimler() {
+  // Bildirim filtreleme
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DESTEK HATTI / ÇAĞRI MERKEZİ
+// ═══════════════════════════════════════════════════════════════════════════
+
+function renderDestekHatti() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-headset"></i></div>
+        Çağrı Merkezi & Destek Hattı
+      </div>
+      <button class="btn btn-primary" onclick="modalYeniDestek()">
+        <i class="fa-solid fa-plus"></i> Yeni Destek Talebi
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-ticket"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Toplam Talep</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Bekleyen</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-check-circle"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Çözüldü</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon"><i class="fa-solid fa-exclamation-triangle"></i></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Acil</div>
+      </div>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+      <div class="card" style="margin:0">
+        <h3 style="margin-bottom:15px;display:flex;align-items:center;gap:8px">
+          <i class="fa-solid fa-phone" style="color:var(--accent)"></i>
+          İletişim Bilgileri
+        </h3>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
+            <i class="fa-solid fa-phone" style="color:var(--green);font-size:20px"></i>
+            <div>
+              <div style="font-size:12px;color:var(--text3)">Telefon</div>
+              <div style="font-weight:600">0 (850) 123 45 67</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
+            <i class="fa-solid fa-envelope" style="color:var(--blue);font-size:20px"></i>
+            <div>
+              <div style="font-size:12px;color:var(--text3)">E-posta</div>
+              <div style="font-weight:600">destek@icder.org</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
+            <i class="fa-brands fa-whatsapp" style="color:var(--green);font-size:20px"></i>
+            <div>
+              <div style="font-size:12px;color:var(--text3)">WhatsApp</div>
+              <div style="font-weight:600">0 (555) 123 45 67</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
+            <i class="fa-solid fa-clock" style="color:var(--yellow);font-size:20px"></i>
+            <div>
+              <div style="font-size:12px;color:var(--text3)">Çalışma Saatleri</div>
+              <div style="font-weight:600">Hafta İçi 09:00 - 18:00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card" style="margin:0">
+        <h3 style="margin-bottom:15px;display:flex;align-items:center;gap:8px">
+          <i class="fa-solid fa-question-circle" style="color:var(--accent)"></i>
+          Hızlı Yardım
+        </h3>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="padding:10px;background:var(--bg3);border-radius:8px;cursor:pointer;transition:background 0.2s" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='var(--bg3)'" onclick="acikSSS('kurban')">
+            <i class="fa-solid fa-chevron-right" style="font-size:10px;color:var(--accent)"></i>
+            <span style="margin-left:8px">Kurban organizasyonu nasıl oluşturulur?</span>
+          </div>
+          <div style="padding:10px;background:var(--bg3);border-radius:8px;cursor:pointer;transition:background 0.2s" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='var(--bg3)'" onclick="acikSSS('hisse')">
+            <i class="fa-solid fa-chevron-right" style="font-size:10px;color:var(--accent)"></i>
+            <span style="margin-left:8px">Hisse nasıl eklenir?</span>
+          </div>
+          <div style="padding:10px;background:var(--bg3);border-radius:8px;cursor:pointer;transition:background 0.2s" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='var(--bg3)'" onclick="acikSSS('yazdirma')">
+            <i class="fa-solid fa-chevron-right" style="font-size:10px;color:var(--accent)"></i>
+            <span style="margin-left:8px">Yazdırma ayarları nasıl yapılır?</span>
+          </div>
+          <div style="padding:10px;background:var(--bg3);border-radius:8px;cursor:pointer;transition:background 0.2s" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='var(--bg3)'" onclick="acikSSS('yedek')">
+            <i class="fa-solid fa-chevron-right" style="font-size:10px;color:var(--accent)"></i>
+            <span style="margin-left:8px">Yedekleme nasıl yapılır?</span>
+          </div>
+          <div style="padding:10px;background:var(--bg3);border-radius:8px;cursor:pointer;transition:background 0.2s" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='var(--bg3)'" onclick="acikSSS('bagis')">
+            <i class="fa-solid fa-chevron-right" style="font-size:10px;color:var(--accent)"></i>
+            <span style="margin-left:8px">Bağış kaydı nasıl girilir?</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="margin:0">Destek Taleplerim</h3>
+        <div class="filter-bar" style="margin:0;gap:8px">
+          <select onchange="filterDestekTalepleri()" style="padding:8px">
+            <option value="">Tüm Durumlar</option>
+            <option value="beklemede">Beklemede</option>
+            <option value="inceleniyor">İnceleniyor</option>
+            <option value="cozuldu">Çözüldü</option>
+            <option value="kapandi">Kapatıldı</option>
+          </select>
+          <select onchange="filterDestekTalepleri()" style="padding:8px">
+            <option value="">Tüm Öncelikler</option>
+            <option value="dusuk">Düşük</option>
+            <option value="orta">Orta</option>
+            <option value="yuksek">Yüksek</option>
+            <option value="acil">Acil</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Talep No</th>
+              <th>Konu</th>
+              <th>Kategori</th>
+              <th>Öncelik</th>
+              <th>Durum</th>
+              <th>Oluşturma</th>
+              <th>Son Güncelleme</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="9">
+                <div class="empty-state">
+                  <i class="fa-solid fa-headset"></i>
+                  <p>Henüz destek talebi bulunmuyor</p>
+                  <button class="btn btn-primary" onclick="modalYeniDestek()" style="margin-top:15px">
+                    <i class="fa-solid fa-plus"></i> İlk Talebi Oluştur
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h3 style="margin-bottom:15px;display:flex;align-items:center;gap:8px">
+        <i class="fa-solid fa-video" style="color:var(--accent)"></i>
+        Video Eğitimler
+      </h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:15px">
+        <div style="background:var(--bg3);border-radius:8px;overflow:hidden;cursor:pointer" onclick="oynatVideo('kurban-ekleme')">
+          <div style="aspect-ratio:16/9;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center">
+            <i class="fa-solid fa-play-circle" style="font-size:48px;color:white"></i>
+          </div>
+          <div style="padding:12px">
+            <div style="font-weight:600;margin-bottom:4px">Kurban Ekleme</div>
+            <div style="font-size:12px;color:var(--text3)">5:30 dk</div>
+          </div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;overflow:hidden;cursor:pointer" onclick="oynatVideo('hisse-yonetimi')">
+          <div style="aspect-ratio:16/9;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center">
+            <i class="fa-solid fa-play-circle" style="font-size:48px;color:white"></i>
+          </div>
+          <div style="padding:12px">
+            <div style="font-weight:600;margin-bottom:4px">Hisse Yönetimi</div>
+            <div style="font-size:12px;color:var(--text3)">7:15 dk</div>
+          </div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;overflow:hidden;cursor:pointer" onclick="oynatVideo('yazdirma')">
+          <div style="aspect-ratio:16/9;background:linear-gradient(135deg,var(--yellow),var(--red));display:flex;align-items:center;justify-content:center">
+            <i class="fa-solid fa-play-circle" style="font-size:48px;color:white"></i>
+          </div>
+          <div style="padding:12px">
+            <div style="font-weight:600;margin-bottom:4px">Yazdırma İşlemleri</div>
+            <div style="font-size:12px;color:var(--text3)">4:45 dk</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// Placeholder fonksiyonlar
+function modalYeniDestek() {
+  openModal('Yeni Destek Talebi', `
+    <div class="form-grid">
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Konu *</label>
+        <input id="destek-konu" placeholder="Talep konusu"/>
+      </div>
+      <div class="form-group">
+        <label>Kategori *</label>
+        <select id="destek-kategori">
+          <option value="">Kategori seçin...</option>
+          <option value="teknik">Teknik Destek</option>
+          <option value="kullanim">Kullanım Sorunu</option>
+          <option value="hata">Hata Bildirimi</option>
+          <option value="oneri">Öneri</option>
+          <option value="diger">Diğer</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Öncelik *</label>
+        <select id="destek-oncelik">
+          <option value="dusuk">Düşük</option>
+          <option value="orta" selected>Orta</option>
+          <option value="yuksek">Yüksek</option>
+          <option value="acil">Acil</option>
+        </select>
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Açıklama *</label>
+        <textarea id="destek-aciklama" rows="5" placeholder="Sorununuzu detaylı açıklayın..."></textarea>
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Ekran Görüntüsü</label>
+        <input type="file" id="destek-dosya" accept="image/*"/>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">İptal</button>
+      <button class="btn btn-primary" onclick="gonderDestekTalebi()">
+        <i class="fa-solid fa-paper-plane"></i> Talep Gönder
+      </button>
+    </div>
+  `, false, 'headset');
+}
+
+function gonderDestekTalebi() {
+  toast('Destek talebi gönderme özelliği yakında eklenecek', 'info');
+  closeModal();
+}
+
+function filterDestekTalepleri() {
+  // Destek talepleri filtreleme
+}
+
+function acikSSS(konu) {
+  toast(`${konu} hakkında yardım içeriği yakında eklenecek`, 'info');
+}
+
+function oynatVideo(video) {
+  toast(`${video} video eğitimi yakında eklenecek`, 'info');
+}
+// ═══════════════════════════════════════════════════════════════════════════
+// PARTNER KURULUŞ
+// ═══════════════════════════════════════════════════════════════════════════
+
+function renderPartnerKurumListesi() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-handshake"></i></div>
+        Partner Kurum Listesi
+      </div>
+      <button class="btn btn-primary" onclick="modalYeniPartner()">
+        <i class="fa-solid fa-plus"></i> Yeni Partner Ekle
+      </button>
+    </div>
+    
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="fa-solid fa-building"></i></div>
+        <div class="stat-value">12</div>
+        <div class="stat-label">Toplam Partner</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><i class="fa-solid fa-check-circle"></i></div>
+        <div class="stat-value">10</div>
+        <div class="stat-label">Aktif Partner</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-value">2</div>
+        <div class="stat-label">Beklemede</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon"><i class="fa-solid fa-handshake-angle"></i></div>
+        <div class="stat-value">45</div>
+        <div class="stat-label">Toplam İşbirliği</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="filter-bar" style="margin-bottom:16px">
+        <input id="partner-ara" placeholder="Partner ara..." oninput="filterPartnerler()"/>
+        <select id="partner-durum" onchange="filterPartnerler()">
+          <option value="">Tüm Durumlar</option>
+          <option value="aktif">Aktif</option>
+          <option value="beklemede">Beklemede</option>
+          <option value="pasif">Pasif</option>
+        </select>
+        <select id="partner-kategori" onchange="filterPartnerler()">
+          <option value="">Tüm Kategoriler</option>
+          <option value="dernekler">Dernekler</option>
+          <option value="vakiflar">Vakıflar</option>
+          <option value="belediyeler">Belediyeler</option>
+          <option value="okullar">Okullar</option>
+          <option value="diger">Diğer</option>
+        </select>
+      </div>
+      
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40px">#</th>
+              <th>Kurum Adı</th>
+              <th>Kategori</th>
+              <th>Yetkili Kişi</th>
+              <th>İletişim</th>
+              <th>Şehir</th>
+              <th>İşbirliği Sayısı</th>
+              <th>Durum</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>
+                <div style="font-weight:600">Yardım Eli Derneği</div>
+                <div style="font-size:12px;color:var(--text3)">Kayıt: 15.01.2024</div>
+              </td>
+              <td><span class="badge badge-blue">Dernekler</span></td>
+              <td>
+                <div>Ahmet Yılmaz</div>
+                <div style="font-size:12px;color:var(--text3)">Başkan</div>
+              </td>
+              <td>
+                <div style="font-size:13px"><i class="fa-solid fa-phone" style="color:var(--accent)"></i> 0532 123 4567</div>
+                <div style="font-size:12px;color:var(--text3)"><i class="fa-solid fa-envelope"></i> info@yardimeli.org</div>
+              </td>
+              <td>İstanbul</td>
+              <td><span style="color:var(--green);font-weight:600">15</span></td>
+              <td><span class="badge badge-green">Aktif</span></td>
+              <td>
+                <button class="btn btn-secondary btn-sm" onclick="modalDuzenlePartner(1)" title="Düzenle">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="gorPartnerDetay(1)" title="Detay">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="silPartner(1)" title="Sil">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>
+                <div style="font-weight:600">Hayır Vakfı</div>
+                <div style="font-size:12px;color:var(--text3)">Kayıt: 20.02.2024</div>
+              </td>
+              <td><span class="badge badge-purple">Vakıflar</span></td>
+              <td>
+                <div>Mehmet Demir</div>
+                <div style="font-size:12px;color:var(--text3)">Genel Müdür</div>
+              </td>
+              <td>
+                <div style="font-size:13px"><i class="fa-solid fa-phone" style="color:var(--accent)"></i> 0533 987 6543</div>
+                <div style="font-size:12px;color:var(--text3)"><i class="fa-solid fa-envelope"></i> iletisim@hayirvakfi.org</div>
+              </td>
+              <td>Ankara</td>
+              <td><span style="color:var(--green);font-weight:600">12</span></td>
+              <td><span class="badge badge-green">Aktif</span></td>
+              <td>
+                <button class="btn btn-secondary btn-sm" onclick="modalDuzenlePartner(2)" title="Düzenle">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="gorPartnerDetay(2)" title="Detay">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="silPartner(2)" title="Sil">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>
+                <div style="font-weight:600">Kardeşlik Derneği</div>
+                <div style="font-size:12px;color:var(--text3)">Kayıt: 10.03.2024</div>
+              </td>
+              <td><span class="badge badge-blue">Dernekler</span></td>
+              <td>
+                <div>Fatma Kaya</div>
+                <div style="font-size:12px;color:var(--text3)">Koordinatör</div>
+              </td>
+              <td>
+                <div style="font-size:13px"><i class="fa-solid fa-phone" style="color:var(--accent)"></i> 0534 555 7788</div>
+                <div style="font-size:12px;color:var(--text3)"><i class="fa-solid fa-envelope"></i> bilgi@kardeslik.org</div>
+              </td>
+              <td>İzmir</td>
+              <td><span style="color:var(--yellow);font-weight:600">8</span></td>
+              <td><span class="badge badge-yellow">Beklemede</span></td>
+              <td>
+                <button class="btn btn-secondary btn-sm" onclick="modalDuzenlePartner(3)" title="Düzenle">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="gorPartnerDetay(3)" title="Detay">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="silPartner(3)" title="Sil">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="card" style="margin-top:20px">
+      <h3 style="margin-bottom:15px;display:flex;align-items:center;gap:8px">
+        <i class="fa-solid fa-chart-line" style="color:var(--accent)"></i>
+        İşbirliği İstatistikleri
+      </h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px">
+        <div style="background:var(--bg3);padding:15px;border-radius:8px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:var(--blue);margin-bottom:5px">156</div>
+          <div style="font-size:13px;color:var(--text3)">Toplam Proje</div>
+        </div>
+        <div style="background:var(--bg3);padding:15px;border-radius:8px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:var(--green);margin-bottom:5px">89</div>
+          <div style="font-size:13px;color:var(--text3)">Tamamlanan</div>
+        </div>
+        <div style="background:var(--bg3);padding:15px;border-radius:8px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:var(--yellow);margin-bottom:5px">45</div>
+          <div style="font-size:13px;color:var(--text3)">Devam Eden</div>
+        </div>
+        <div style="background:var(--bg3);padding:15px;border-radius:8px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:var(--purple);margin-bottom:5px">22</div>
+          <div style="font-size:13px;color:var(--text3)">Planlanan</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// Placeholder fonksiyonlar
+function modalYeniPartner() {
+  openModal('Yeni Partner Kurum Ekle', `
+    <div class="form-grid">
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Kurum Adı *</label>
+        <input id="partner-ad" placeholder="Kurum adını girin"/>
+      </div>
+      <div class="form-group">
+        <label>Kategori *</label>
+        <select id="partner-kategori-sec">
+          <option value="">Kategori seçin...</option>
+          <option value="dernekler">Dernekler</option>
+          <option value="vakiflar">Vakıflar</option>
+          <option value="belediyeler">Belediyeler</option>
+          <option value="okullar">Okullar</option>
+          <option value="diger">Diğer</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Durum *</label>
+        <select id="partner-durum-sec">
+          <option value="aktif">Aktif</option>
+          <option value="beklemede">Beklemede</option>
+          <option value="pasif">Pasif</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Yetkili Kişi *</label>
+        <input id="partner-yetkili" placeholder="Ad Soyad"/>
+      </div>
+      <div class="form-group">
+        <label>Ünvan</label>
+        <input id="partner-unvan" placeholder="Başkan, Müdür, vb."/>
+      </div>
+      <div class="form-group">
+        <label>Telefon *</label>
+        <input id="partner-telefon" placeholder="0532 123 4567"/>
+      </div>
+      <div class="form-group">
+        <label>E-posta</label>
+        <input id="partner-email" type="email" placeholder="ornek@kurum.org"/>
+      </div>
+      <div class="form-group">
+        <label>Şehir *</label>
+        <input id="partner-sehir" placeholder="İstanbul"/>
+      </div>
+      <div class="form-group">
+        <label>İlçe</label>
+        <input id="partner-ilce" placeholder="Kadıköy"/>
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Adres</label>
+        <textarea id="partner-adres" rows="2" placeholder="Tam adres..."></textarea>
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Notlar</label>
+        <textarea id="partner-notlar" rows="3" placeholder="İşbirliği notları, özel bilgiler..."></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">İptal</button>
+      <button class="btn btn-primary" onclick="kaydetPartner()">
+        <i class="fa-solid fa-floppy-disk"></i> Kaydet
+      </button>
+    </div>
+  `, true, 'handshake');
+}
+
+function kaydetPartner() {
+  toast('Partner kurum ekleme özelliği geliştiriliyor...', 'info');
+  closeModal();
+}
+
+function modalDuzenlePartner(id) {
+  toast('Partner düzenleme özelliği geliştiriliyor...', 'info');
+}
+
+function gorPartnerDetay(id) {
+  openModal('Partner Kurum Detayı', `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <h4 style="margin-bottom:15px;color:var(--accent)">Kurum Bilgileri</h4>
+        <div style="background:var(--bg3);padding:15px;border-radius:8px;margin-bottom:15px">
+          <div style="margin-bottom:10px">
+            <div style="font-size:12px;color:var(--text3);margin-bottom:3px">Kurum Adı</div>
+            <div style="font-weight:600">Yardım Eli Derneği</div>
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:12px;color:var(--text3);margin-bottom:3px">Kategori</div>
+            <div><span class="badge badge-blue">Dernekler</span></div>
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:12px;color:var(--text3);margin-bottom:3px">Durum</div>
+            <div><span class="badge badge-green">Aktif</span></div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:3px">Kayıt Tarihi</div>
+            <div>15.01.2024</div>
+          </div>
+        </div>
+        
+        <h4 style="margin-bottom:15px;color:var(--accent)">İletişim Bilgileri</h4>
+        <div style="background:var(--bg3);padding:15px;border-radius:8px">
+          <div style="margin-bottom:10px">
+            <div style="font-size:12px;color:var(--text3);margin-bottom:3px">Yetkili Kişi</div>
+            <div style="font-weight:600">Ahmet Yılmaz</div>
+            <div style="font-size:12px;color:var(--text3)">Başkan</div>
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:12px;color:var(--text3);margin-bottom:3px">Telefon</div>
+            <div><i class="fa-solid fa-phone" style="color:var(--accent)"></i> 0532 123 4567</div>
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:12px;color:var(--text3);margin-bottom:3px">E-posta</div>
+            <div><i class="fa-solid fa-envelope" style="color:var(--accent)"></i> info@yardimeli.org</div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:3px">Adres</div>
+            <div style="font-size:13px">İstanbul, Kadıköy</div>
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <h4 style="margin-bottom:15px;color:var(--accent)">İşbirliği İstatistikleri</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+          <div style="background:var(--bg3);padding:12px;border-radius:8px;text-align:center">
+            <div style="font-size:24px;font-weight:700;color:var(--blue)">15</div>
+            <div style="font-size:11px;color:var(--text3)">Toplam İşbirliği</div>
+          </div>
+          <div style="background:var(--bg3);padding:12px;border-radius:8px;text-align:center">
+            <div style="font-size:24px;font-weight:700;color:var(--green)">12</div>
+            <div style="font-size:11px;color:var(--text3)">Tamamlanan</div>
+          </div>
+          <div style="background:var(--bg3);padding:12px;border-radius:8px;text-align:center">
+            <div style="font-size:24px;font-weight:700;color:var(--yellow)">3</div>
+            <div style="font-size:11px;color:var(--text3)">Devam Eden</div>
+          </div>
+          <div style="background:var(--bg3);padding:12px;border-radius:8px;text-align:center">
+            <div style="font-size:24px;font-weight:700;color:var(--purple)">250K</div>
+            <div style="font-size:11px;color:var(--text3)">Toplam Bütçe</div>
+          </div>
+        </div>
+        
+        <h4 style="margin-bottom:15px;color:var(--accent)">Son İşbirlikleri</h4>
+        <div style="background:var(--bg3);padding:15px;border-radius:8px">
+          <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+            <div style="font-weight:600;margin-bottom:4px">2024 Kurban Organizasyonu</div>
+            <div style="font-size:12px;color:var(--text3)">Tamamlandı • 15.07.2024</div>
+          </div>
+          <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+            <div style="font-weight:600;margin-bottom:4px">Ramazan Yardım Paketi</div>
+            <div style="font-size:12px;color:var(--text3)">Tamamlandı • 25.03.2024</div>
+          </div>
+          <div>
+            <div style="font-weight:600;margin-bottom:4px">Su Kuyusu Projesi</div>
+            <div style="font-size:12px;color:var(--yellow)">Devam Ediyor • Başlangıç: 10.01.2024</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-actions" style="margin-top:20px">
+      <button class="btn btn-secondary" onclick="closeModal()">Kapat</button>
+      <button class="btn btn-primary" onclick="modalDuzenlePartner(${id})">
+        <i class="fa-solid fa-pen"></i> Düzenle
+      </button>
+    </div>
+  `, true, 'handshake');
+}
+
+function silPartner(id) {
+  if (confirm('Bu partner kurumu silmek istediğinizden emin misiniz?')) {
+    toast('Partner silme özelliği geliştiriliyor...', 'info');
+  }
+}
+
+function filterPartnerler() {
+  toast('Filtreleme özelliği geliştiriliyor...', 'info');
 }

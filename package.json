@@ -1,7 +1,7 @@
 {
   "name": "icder-kurban",
-  "version": "1.0.4",
-  "description": "İÇDER Kurban Programı - İÇDER & Defterdar İşbirliği",
+  "version": "2.0.0",
+  "description": "İÇDER Kurban Programı - Ağ Üzerinden Erişim Destekli",
   "main": "electron.js",
   "author": "İÇDER & Defterdar",
   "engines": {
@@ -10,7 +10,8 @@
   "scripts": {
     "start": "node server.js",
     "electron": "electron .",
-    "build": "electron-builder"
+    "build": "electron-builder",
+    "build:win": "electron-builder --win --x64"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -43,11 +44,13 @@
         }
       ],
       "icon": "assets/icon.ico",
-      "publisherName": "İÇDER"
+      "publisherName": "İÇDER",
+      "requestedExecutionLevel": "requireAdministrator"
     },
     "nsis": {
-      "oneClick": true,
+      "oneClick": false,
       "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "İÇDER Kurban Programı",
@@ -56,14 +59,20 @@
       "installerHeaderIcon": "assets/icon.ico",
       "deleteAppDataOnUninstall": false,
       "uninstallDisplayName": "İÇDER Kurban Programı",
-      "include": "build/installer.nsh"
+      "include": "build/installer.nsh",
+      "warningsAsErrors": false,
+      "runAfterFinish": true,
+      "menuCategory": true,
+      "artifactName": "${productName}-Kurulum-${version}.${ext}"
     },
     "files": [
       "**/*",
       "!data/**",
       "!dist/**",
       "!node_modules/.cache/**",
-      "!*.md"
+      "!*.md",
+      "!fix_*.py",
+      "!*.bat"
     ],
     "extraMetadata": {
       "author": "İÇDER & Defterdar"

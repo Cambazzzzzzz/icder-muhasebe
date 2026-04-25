@@ -209,15 +209,29 @@
   </div>
 
   <div class="title-wrap">
-    <div class="title">DEFTERDAR</div>
+    <div class="title">İÇDER KURBAN</div>
   </div>
-  <div class="subtitle">Muhasebe Sistemi</div>
+  <div class="subtitle">Kurban Yönetim Sistemi</div>
 
   <div class="progress-wrap">
     <div class="progress-track">
       <div class="progress-fill" id="pbar"></div>
     </div>
-    <div class="progress-text" id="ptext">Baslatiliyor...</div>
+    <div class="progress-text" id="ptext">Başlatılıyor...</div>
+  </div>
+  
+  <!-- Ağ Bilgileri -->
+  <div class="network-info" id="networkInfo" style="margin-top: 20px; opacity: 0; animation: fadeIn 0.6s ease 1.8s forwards;">
+    <div style="font-size: 11px; color: rgba(148,163,184,0.8); text-align: center; letter-spacing: 1px;">
+      <div style="margin-bottom: 8px;">
+        <i class="fa-solid fa-wifi" style="margin-right: 6px;"></i>
+        <span>AĞ ÜZERİNDEN ERİŞİM AKTİF</span>
+      </div>
+      <div id="ipList" style="font-size: 10px; color: rgba(79,126,248,0.9);"></div>
+      <div style="margin-top: 8px; font-size: 9px; color: rgba(148,163,184,0.5);">
+        Port: 4500 | Aynı WiFi ağındaki cihazlardan erişilebilir
+      </div>
+    </div>
   </div>
 </div>
 
@@ -239,8 +253,25 @@
     pc.appendChild(p);
   }
 
+  // Ağ IP'lerini al ve göster
+  fetch('http://127.0.0.1:4500/api/sistem/ip')
+    .then(r => r.json())
+    .then(data => {
+      const ipList = document.getElementById('ipList');
+      if (data.ips && data.ips.length > 0) {
+        ipList.innerHTML = data.ips.map(info => 
+          `<div style="margin: 4px 0;">http://${info.ip}:4500</div>`
+        ).join('');
+      } else {
+        ipList.innerHTML = '<div>Ağ bağlantısı bekleniyor...</div>';
+      }
+    })
+    .catch(() => {
+      document.getElementById('ipList').innerHTML = '<div>Yerel: http://127.0.0.1:4500</div>';
+    });
+
   // Progress
-  const msgs = ['','','',''];
+  const msgs = ['Sunucu başlatılıyor...','Veritabanı yükleniyor...','Ağ ayarları yapılıyor...','Hazır!'];
   let pct = 0;
   const bar = document.getElementById('pbar');
   const txt = document.getElementById('ptext');
