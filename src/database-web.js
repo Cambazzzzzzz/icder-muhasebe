@@ -4,9 +4,23 @@ const path = require('path');
 const fs = require('fs');
 
 function getDataDir() {
-  // Railway: /data volume veya proje içi data klasörü
-  const dataPath = process.env.DATA_DIR || path.join(__dirname, '..', 'data');
-  return dataPath;
+  // Öncelik sırası:
+  // 1. DATA_DIR env variable (Railway Volume için /data)
+  // 2. /data klasörü varsa ve yazılabilirse (Railway Volume otomatik mount)
+  // 3. Proje içi data klasörü (fallback)
+  if (process.env.DATA_DIR) {
+    return process.env.DATA_DIR;
+  }
+  // Railway volume otomatik /data'ya mount edilir
+  try {
+    if (fs.existsSync('/data')) {
+      fs.accessSync('/data', fs.constants.W_OK);
+      console.log('[DB] Railway Volume bulundu: /data');
+      return '/data';
+    }
+  } catch(e) {}
+  // Fallback: proje içi data klasörü
+  return path.join(__dirname, '..', 'data');
 }
 
 const dataDir = getDataDir();
@@ -22,7 +36,11 @@ function scheduleSave(sqlDb) {
     try {
       const data = sqlDb.export();
       fs.writeFileSync(DB_PATH, Buffer.from(data));
-    } catch (e) { console.error('DB kayit hatasi:', e); }
+    } catch (e) {
+      console.error('[DB] Kayit hatasi:', e.message);
+      console.error('[DB] DB_PATH:', DB_PATH);
+      console.error('[DB] DATA_DIR:', process.env.DATA_DIR || 'yok');
+    }
   }, 1000);
 }
 
