@@ -2721,10 +2721,6 @@ function modalYeniBagisTuru() {
   toast('Bağış türü ekleme özelliği yakında eklenecek', 'info');
 }
 
-function modalYeniBagisci() {
-  toast('Bağışçı ekleme özelliği yakında eklenecek', 'info');
-}
-
 function kaydetBagis() {
   toast('Bağış kaydetme özelliği yakında eklenecek', 'info');
 }
