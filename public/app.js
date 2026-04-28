@@ -262,9 +262,10 @@ function showPage(page) {
 function toggleBagisMenu() {
   const submenu = document.getElementById('bagis-submenu');
   const chevron = document.getElementById('bagis-chevron');
-  if (submenu.style.display === 'none') {
+  if (submenu.style.display === 'none' || submenu.style.display === '') {
     submenu.style.display = 'block';
     chevron.style.transform = 'rotate(180deg)';
+    setTimeout(() => submenu.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
   } else {
     submenu.style.display = 'none';
     chevron.style.transform = 'rotate(0deg)';
@@ -274,7 +275,7 @@ function toggleBagisMenu() {
 function toggleDepoStokMenu() {
   const submenu = document.getElementById('depo-stok-submenu');
   const chevron = document.getElementById('depo-stok-chevron');
-  if (submenu.style.display === 'none') {
+  if (submenu.style.display === 'none' || submenu.style.display === '') {
     submenu.style.display = 'block';
     chevron.style.transform = 'rotate(180deg)';
   } else {
@@ -286,7 +287,7 @@ function toggleDepoStokMenu() {
 function toggleYardimMenu() {
   const submenu = document.getElementById('yardim-submenu');
   const chevron = document.getElementById('yardim-chevron');
-  if (submenu.style.display === 'none') {
+  if (submenu.style.display === 'none' || submenu.style.display === '') {
     submenu.style.display = 'block';
     chevron.style.transform = 'rotate(180deg)';
   } else {
@@ -298,7 +299,7 @@ function toggleYardimMenu() {
 function toggleOrganizasyonMenu() {
   const submenu = document.getElementById('organizasyon-submenu');
   const chevron = document.getElementById('organizasyon-chevron');
-  if (submenu.style.display === 'none') {
+  if (submenu.style.display === 'none' || submenu.style.display === '') {
     submenu.style.display = 'block';
     chevron.style.transform = 'rotate(180deg)';
   } else {
@@ -310,7 +311,7 @@ function toggleOrganizasyonMenu() {
 function toggleRaporlarMenu() {
   const submenu = document.getElementById('raporlar-submenu');
   const chevron = document.getElementById('raporlar-chevron');
-  if (submenu.style.display === 'none') {
+  if (submenu.style.display === 'none' || submenu.style.display === '') {
     submenu.style.display = 'block';
     chevron.style.transform = 'rotate(180deg)';
   } else {
@@ -322,7 +323,7 @@ function toggleRaporlarMenu() {
 function toggleKisiselMenu() {
   const submenu = document.getElementById('kisisel-submenu');
   const chevron = document.getElementById('kisisel-chevron');
-  if (submenu.style.display === 'none') {
+  if (submenu.style.display === 'none' || submenu.style.display === '') {
     submenu.style.display = 'block';
     chevron.style.transform = 'rotate(180deg)';
   } else {
@@ -334,7 +335,7 @@ function toggleKisiselMenu() {
 function togglePartnerMenu() {
   const submenu = document.getElementById('partner-submenu');
   const chevron = document.getElementById('partner-chevron');
-  if (submenu.style.display === 'none') {
+  if (submenu.style.display === 'none' || submenu.style.display === '') {
     submenu.style.display = 'block';
     chevron.style.transform = 'rotate(180deg)';
   } else {
