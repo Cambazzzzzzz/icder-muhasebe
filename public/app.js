@@ -617,7 +617,7 @@ function filterKurbanlar() {
     if (durum === 'bos') return !k.kesildi && k.dolu_hisse < k.toplam_hisse;
     if (durum === 'doldu') return !k.kesildi && k.dolu_hisse >= k.toplam_hisse;
     if (durum === 'kesildi') return !!k.kesildi;
-    if (durum === 'odendi') return k.dolu_hisse > 0 && k._odendi_sayi === k.dolu_hisse; // aşağıda hesaplanacak
+    if (durum === 'odendi') return k.dolu_hisse > 0 && k._odendi_sayi === k.dolu_hisse;
     if (durum === 'bekliyor') return k._bekliyor_sayi > 0;
     if (durum === 'video-var') return k._video_sayi > 0;
     if (durum === 'video-yok') return k.dolu_hisse > 0 && k._video_sayi === 0;
