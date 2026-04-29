@@ -2597,9 +2597,14 @@ async function bagisAlKaydet() {
   if (!dolular.length) { toast('En az bir hisse için bağışçı adı girin', 'error'); return; }
   try {
     if (_bagisAlMod === 'mevcut' && _bagisAlKurban.id) {
+      // Her hisseyi hisse_no ile eşleştirerek kaydet
       for (let i = 0; i < _bagisAlHisseler.length; i++) {
         const h = _bagisAlHisseler[i];
-        if (h && h.id) await api('PUT', '/hisseler/' + h.id, hisseler[i]);
+        if (!h || !h.id) continue;
+        const hisseNo = h.hisse_no - 1; // hisse_no 1'den başlıyor, array 0'dan
+        const veri = hisseler[hisseNo];
+        if (!veri) continue;
+        await api('PUT', '/hisseler/' + h.id, veri);
       }
       toast(dolular.length + ' bağışçı kaydedildi');
     } else {
