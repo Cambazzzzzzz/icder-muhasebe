@@ -1411,7 +1411,7 @@ function kurbanYazdirHTML(kurbanNo, tur, hisseler, kurbanData, orientation = 'po
     table { width: 100%; border-collapse: collapse; margin-top: 8px; }
     th { border: 1.5px solid #000; padding: 10px 14px; text-align: left; font-size: 18px; font-weight: bold; background: #fff; }
     td { border: 1.5px solid #000; padding: 10px 14px; font-size: 18px; font-weight: 500; }
-    .footer { position: fixed; bottom: 8mm; left: 0; right: 0; text-align: center; font-size: 16px; font-weight: bold; color: #333; border-top: 1px solid #ddd; padding-top: 6px; }
+    .footer { display: none; }
     @media print {
       html, body { margin: 0; padding: 0; }
     }
@@ -1495,7 +1495,7 @@ async function renderDenetim() {
           <tr><td style="color:var(--text3);padding:7px 0">İşbirliği</td><td style="color:var(--accent);font-weight:600">İÇDER & Defterdar</td></tr>
           <tr><td style="color:var(--text3);padding:7px 0">Modul</td><td>Kurban Organizasyonu</td></tr>
           <tr><td style="color:var(--text3);padding:7px 0">Lisans</td><td>İÇDER &copy; 2025</td></tr>
-          <tr><td style="color:var(--text3);padding:7px 0">Site</td><td><a href="https://icder.org.tr" target="_blank" style="color:var(--accent);text-decoration:none">icder.org.tr</a></td></tr>
+          <tr><td style="color:var(--text3);padding:7px 0">Site</td><td><a href="https://icder.org" target="_blank" style="color:var(--accent);text-decoration:none">icder.org</a></td></tr>
         </table>
       </div>
       <div class="card">
