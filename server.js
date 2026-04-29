@@ -7,7 +7,11 @@ const PORT = process.env.PORT || 4500;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+
+// index.html hariç statik dosyalar (CSS, JS, resimler vs.)
+app.use(express.static(path.join(__dirname, 'public'), {
+  index: false // index.html'i otomatik servis etme, middleware'den geçsin
+}));
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'defterdar-cms-2024',
@@ -51,20 +55,61 @@ async function icderGirisKontrol(req, res, next) {
       req.path.includes('.ico')) {
     return next();
   }
+
+  // ─── SİSTEM MODU KONTROLÜ ───────────────────────────────────────────────
+  try {
+    const { getDb } = process.env.RAILWAY_ENVIRONMENT || process.env.PORT
+      ? require('./src/database-web')
+      : require('./src/database');
+    const db = await getDb();
+    const modRow = db.prepare("SELECT deger FROM sistem_ayarlari WHERE anahtar='sistem_modu'").get();
+    const notRow = db.prepare("SELECT deger FROM sistem_ayarlari WHERE anahtar='sistem_notu'").get();
+    const mod = modRow?.deger || 'acik';
+    const not = notRow?.deger || '';
+
+    if (mod === 'bakim' || mod === 'kapali') {
+      // Admin oturumu varsa geçir
+      if (req.session.adminGiris) return next();
+      // İçder oturumu varsa da çıkar
+      delete req.session.icderGiris;
+      const modText = mod === 'bakim' ? '🔧 Bakım Modu' : '🔒 Sistem Kapalı';
+      const renk = mod === 'bakim' ? '#f59e0b' : '#ef4444';
+      return res.send(`<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>${modText} — İÇDER Kurban</title>
+        <style>
+          *{box-sizing:border-box;margin:0;padding:0}
+          body{font-family:'Segoe UI',sans-serif;background:#0a1410;color:#e8f5ee;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px}
+          .wrap{max-width:480px}
+          .icon{font-size:72px;margin-bottom:24px}
+          h1{font-size:28px;font-weight:800;color:${renk};margin-bottom:12px}
+          p{font-size:15px;color:#a8c9b8;line-height:1.7;margin-bottom:24px}
+          .note{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:16px 20px;font-size:14px;color:#e8f5ee;margin-bottom:24px}
+          a{color:${renk};text-decoration:none;font-size:13px}
+        </style>
+      </head><body>
+        <div class="wrap">
+          <div class="icon">${mod === 'bakim' ? '🔧' : '🔒'}</div>
+          <h1>${modText}</h1>
+          <p>${mod === 'bakim' ? 'Sistem şu anda bakım modunda. Kısa süre içinde tekrar erişilebilir olacak.' : 'Sistem şu anda kapalı. Lütfen daha sonra tekrar deneyin.'}</p>
+          ${not ? `<div class="note"><strong>Yönetici Notu:</strong><br>${not}</div>` : ''}
+          <a href="/admin-giris">→ Yönetici Girişi</a>
+        </div>
+      </body></html>`);
+    }
+  } catch(e) { /* DB hatası olursa devam et */ }
   
   // İçder giriş kontrolü
   if (req.session.icderGiris) {
     const gecenSure = Date.now() - req.session.icderGiris;
-    const yirmidortSaat = 24 * 60 * 60 * 1000; // 24 saat
+    const yirmidortSaat = 24 * 60 * 60 * 1000;
     if (gecenSure < yirmidortSaat) {
-      return next(); // Giriş yapılmış ve 24 saat geçmemiş
+      return next();
     } else {
-      // Oturum süresi dolmuş, session'ı temizle
       delete req.session.icderGiris;
     }
   }
   
-  // Giriş yapılmamış veya süresi dolmuş, icder-giris'e yönlendir
   return res.redirect('/icder-giris');
 }
 

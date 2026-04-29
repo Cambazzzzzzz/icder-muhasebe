@@ -4230,60 +4230,31 @@ async function renderDestekHatti() {
     <div class="page-header">
       <div class="page-title">
         <div class="icon-wrap"><i class="fa-solid fa-headset"></i></div>
-        Çağrı Merkezi & Destek Hattı
+        Destek Hattı
       </div>
       <button class="btn btn-primary" onclick="modalYeniDestek()">
         <i class="fa-solid fa-plus"></i> Yeni Destek Talebi
       </button>
     </div>
     
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
-      <div class="card" style="margin:0">
-        <h3 style="margin-bottom:15px;display:flex;align-items:center;gap:8px">
-          <i class="fa-solid fa-phone" style="color:var(--accent)"></i>
-          İletişim Bilgileri
-        </h3>
-        <div style="display:flex;flex-direction:column;gap:12px">
-          <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
-            <i class="fa-solid fa-phone" style="color:var(--green);font-size:20px"></i>
-            <div><div style="font-size:12px;color:var(--text3)">Telefon</div><div style="font-weight:600">0 (850) 123 45 67</div></div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
-            <i class="fa-solid fa-envelope" style="color:var(--accent);font-size:20px"></i>
-            <div><div style="font-size:12px;color:var(--text3)">E-posta</div><div style="font-weight:600">destek@icder.org</div></div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
-            <i class="fa-brands fa-whatsapp" style="color:var(--green);font-size:20px"></i>
-            <div><div style="font-size:12px;color:var(--text3)">WhatsApp</div><div style="font-weight:600">0 (555) 123 45 67</div></div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
-            <i class="fa-solid fa-clock" style="color:var(--yellow);font-size:20px"></i>
-            <div><div style="font-size:12px;color:var(--text3)">Çalışma Saatleri</div><div style="font-weight:600">Hafta İçi 09:00 - 18:00</div></div>
-          </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title"><i class="fa-solid fa-phone"></i> İletişim</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
+          <i class="fa-solid fa-phone" style="color:var(--green);font-size:18px"></i>
+          <div><div style="font-size:11px;color:var(--text3)">Telefon</div><div style="font-weight:600">0 (850) 123 45 67</div></div>
         </div>
-      </div>
-      <div class="card" style="margin:0">
-        <h3 style="margin-bottom:15px;display:flex;align-items:center;gap:8px">
-          <i class="fa-solid fa-question-circle" style="color:var(--accent)"></i>
-          Hızlı Yardım
-        </h3>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <div style="padding:10px;background:var(--bg3);border-radius:8px;cursor:pointer" onclick="acikSSS('kurban')">
-            <i class="fa-solid fa-chevron-right" style="font-size:10px;color:var(--accent)"></i>
-            <span style="margin-left:8px">Kurban organizasyonu nasıl oluşturulur?</span>
-          </div>
-          <div style="padding:10px;background:var(--bg3);border-radius:8px;cursor:pointer" onclick="acikSSS('hisse')">
-            <i class="fa-solid fa-chevron-right" style="font-size:10px;color:var(--accent)"></i>
-            <span style="margin-left:8px">Hisse nasıl eklenir?</span>
-          </div>
-          <div style="padding:10px;background:var(--bg3);border-radius:8px;cursor:pointer" onclick="acikSSS('yazdirma')">
-            <i class="fa-solid fa-chevron-right" style="font-size:10px;color:var(--accent)"></i>
-            <span style="margin-left:8px">Yazdırma ayarları nasıl yapılır?</span>
-          </div>
-          <div style="padding:10px;background:var(--bg3);border-radius:8px;cursor:pointer" onclick="acikSSS('yedek')">
-            <i class="fa-solid fa-chevron-right" style="font-size:10px;color:var(--accent)"></i>
-            <span style="margin-left:8px">Yedekleme nasıl yapılır?</span>
-          </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
+          <i class="fa-solid fa-envelope" style="color:var(--accent);font-size:18px"></i>
+          <div><div style="font-size:11px;color:var(--text3)">E-posta</div><div style="font-weight:600">destek@icder.org</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
+          <i class="fa-brands fa-whatsapp" style="color:var(--green);font-size:18px"></i>
+          <div><div style="font-size:11px;color:var(--text3)">WhatsApp</div><div style="font-weight:600">0 (555) 123 45 67</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:8px">
+          <i class="fa-solid fa-clock" style="color:var(--yellow);font-size:18px"></i>
+          <div><div style="font-size:11px;color:var(--text3)">Çalışma Saatleri</div><div style="font-weight:600">Hafta İçi 09:00 - 18:00</div></div>
         </div>
       </div>
     </div>

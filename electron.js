@@ -8,6 +8,111 @@ let splashWindow;
 let server;
 const PORT = 4500;
 
+// ── OTOMATİK YEDEK KLASÖRÜ
+function getAutoBackupDir() {
+  try {
+    const userDataPath = app.getPath('userData');
+    const dir = path.join(userDataPath, 'otomatik-yedek');
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    return dir;
+  } catch(e) {
+    const dir = path.join(__dirname, 'otomatik-yedek');
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    return dir;
+  }
+}
+
+// ── OTOMATİK YEDEK AL (her 10 dakikada bir)
+async function otomatikYedekAl() {
+  try {
+    const res = await new Promise((resolve, reject) => {
+      const req = http.get(`http://127.0.0.1:${PORT}/api/admin/yedek-al-internal`, (r) => {
+        let data = '';
+        r.on('data', c => data += c);
+        r.on('end', () => resolve({ status: r.statusCode, data }));
+      });
+      req.on('error', reject);
+      req.setTimeout(15000, () => { req.destroy(); reject(new Error('timeout')); });
+    });
+
+    if (res.status !== 200) return;
+
+    const dir = getAutoBackupDir();
+    const tarih = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const dosyaAdi = `oto-yedek-${tarih}.json`;
+    fs.writeFileSync(path.join(dir, dosyaAdi), res.data, 'utf8');
+
+    // Son 20 yedeği tut, eskilerini sil
+    const dosyalar = fs.readdirSync(dir)
+      .filter(f => f.startsWith('oto-yedek-') && f.endsWith('.json'))
+      .sort()
+      .reverse();
+    if (dosyalar.length > 20) {
+      dosyalar.slice(20).forEach(f => {
+        try { fs.unlinkSync(path.join(dir, f)); } catch(e) {}
+      });
+    }
+    console.log(`[OTO-YEDEK] Kaydedildi: ${dosyaAdi}`);
+  } catch(e) {
+    console.error('[OTO-YEDEK] Hata:', e.message);
+  }
+}
+
+// ── IPC: Otomatik yedek listesi
+ipcMain.handle('list-auto-backups', () => {
+  try {
+    const dir = getAutoBackupDir();
+    const dosyalar = fs.readdirSync(dir)
+      .filter(f => f.startsWith('oto-yedek-') && f.endsWith('.json'))
+      .sort()
+      .reverse()
+      .map(f => {
+        const stat = fs.statSync(path.join(dir, f));
+        return { filename: f, size: stat.size, mtime: stat.mtime.toISOString() };
+      });
+    return { ok: true, dosyalar, dir };
+  } catch(e) {
+    return { ok: false, dosyalar: [], dir: '' };
+  }
+});
+
+// ── IPC: Otomatik yedek indir (kaydet dialogu)
+ipcMain.handle('download-auto-backup', async (event, filename) => {
+  try {
+    const dir = getAutoBackupDir();
+    const src = path.join(dir, filename);
+    if (!fs.existsSync(src)) return { ok: false, error: 'Dosya bulunamadı' };
+
+    const { filePath, canceled } = await dialog.showSaveDialog(mainWindow, {
+      defaultPath: filename,
+      title: 'Yedeği Kaydet',
+      filters: [{ name: 'JSON Yedek', extensions: ['json'] }]
+    });
+    if (canceled || !filePath) return { ok: false, canceled: true };
+    fs.copyFileSync(src, filePath);
+    return { ok: true, path: filePath };
+  } catch(e) {
+    return { ok: false, error: e.message };
+  }
+});
+
+// ── IPC: Otomatik yedek sil
+ipcMain.handle('delete-auto-backup', (event, filename) => {
+  try {
+    const dir = getAutoBackupDir();
+    const dosya = path.join(dir, filename);
+    if (fs.existsSync(dosya)) fs.unlinkSync(dosya);
+    return { ok: true };
+  } catch(e) {
+    return { ok: false, error: e.message };
+  }
+});
+
+// ── IPC: Yedek klasörü yolu
+ipcMain.handle('get-auto-backup-dir', () => {
+  return getAutoBackupDir();
+});
+
 function waitForServer(cb, tries = 0) {
   http.get(`http://127.0.0.1:${PORT}/api/organizasyonlar`, () => cb())
     .on('error', () => {
@@ -194,7 +299,14 @@ app.whenReady().then(() => {
   server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') waitForServer(() => createMain());
   });
-  server.on('listening', () => waitForServer(() => createMain()));
+  server.on('listening', () => waitForServer(() => {
+    createMain();
+    // Sunucu hazır olunca 10 dakikada bir otomatik yedek al
+    setTimeout(() => {
+      otomatikYedekAl(); // İlk yedek hemen
+      setInterval(otomatikYedekAl, 10 * 60 * 1000); // Sonraki her 10 dk
+    }, 5000); // Sunucu tam oturuncaya kadar 5sn bekle
+  }));
   server.listen(PORT, '0.0.0.0');
 });
 

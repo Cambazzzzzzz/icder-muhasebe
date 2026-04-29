@@ -567,11 +567,11 @@ router.get('/tam-yedek', async (req, res) => {
 
     // Her organizasyon için kurban ve hisseleri topla
     for (const org of organizasyonlar) {
-      const kurbanlar = db.prepare('SELECT * FROM kurbanlar WHERE organizasyon_id=?').all(org.id);
+      const kurbanlar = db.prepare('SELECT * FROM kurbanlar WHERE organizasyon_id=? ORDER BY kurban_no ASC').all(org.id);
       const orgData = { ...org, kurbanlar: [] };
       
       for (const k of kurbanlar) {
-        const hisseler = db.prepare('SELECT * FROM hisseler WHERE kurban_id=?').all(k.id);
+        const hisseler = db.prepare('SELECT * FROM hisseler WHERE kurban_id=? ORDER BY hisse_no ASC').all(k.id);
         orgData.kurbanlar.push({ ...k, hisseler });
       }
       

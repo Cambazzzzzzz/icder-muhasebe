@@ -51,10 +51,12 @@ function showAdminPage(page) {
   else if (page === 'sistem-modu') renderSistemModu();
   else if (page === 'organizasyonlar') renderOrganizasyonlar();
   else if (page === 'kurbanlar') renderKurbanlar();
+  else if (page === 'bagiscilar') renderBagiscilar();
   else if (page === 'medya') renderMedya();
   else if (page === 'talepler') renderTalepler();
   else if (page === 'sifreler') renderSifreler();
   else if (page === 'yazdirma-ayarlari') renderYazdirmaAyarlari();
+  else if (page === 'yedek') renderYedek();
 }
 
 // ─── DASHBOARD ───────────────────────────────────────────────────────────────
@@ -629,3 +631,289 @@ async function adminCikis() {
 window.addEventListener('load', function() {
   showAdminPage('dashboard');
 });
+
+// ─── BAĞIŞÇILAR ──────────────────────────────────────────────────────────────
+async function renderBagiscilar() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-users"></i></div>
+        Tüm Bağışçılar
+      </div>
+    </div>
+    <div class="card">
+      <div class="filter-bar" style="margin-bottom:12px">
+        <input id="bagisci-ara" placeholder="Bağışçı adı ara..." oninput="adminBagisciFiltrele()" style="min-width:220px"/>
+      </div>
+      <div class="table-wrap" id="bagisci-table">
+        <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Yükleniyor...</p></div>
+      </div>
+    </div>`;
+  await adminYukleBagiscilar();
+}
+
+let _adminBagiscilar = [];
+async function adminYukleBagiscilar() {
+  try {
+    _adminBagiscilar = await adminApi('GET', '/bagiscilar');
+    adminBagisciFiltrele();
+  } catch(e) {
+    document.getElementById('bagisci-table').innerHTML = '<div class="empty-state"><i class="fa-solid fa-exclamation-triangle"></i><p>Yüklenemedi</p></div>';
+  }
+}
+
+function adminBagisciFiltrele() {
+  const q = (document.getElementById('bagisci-ara')?.value || '').toLowerCase();
+  const list = q ? _adminBagiscilar.filter(b => (b.bagisci_adi||'').toLowerCase().includes(q) || (b.bagisci_telefon||'').includes(q)) : _adminBagiscilar;
+  const el = document.getElementById('bagisci-table');
+  if (!el) return;
+  if (!list.length) { el.innerHTML = '<div class="empty-state"><i class="fa-solid fa-users"></i><p>Bağışçı bulunamadı</p></div>'; return; }
+  let html = '<table><thead><tr><th>#</th><th>Bağışçı</th><th>Telefon</th><th>Kimin Adına</th><th>Organizasyon</th><th>Kurban</th><th>Ödeme</th><th>Video</th><th>İşlemler</th></tr></thead><tbody>';
+  list.forEach((b, i) => {
+    html += `<tr>
+      <td>${i+1}</td>
+      <td><strong>${b.bagisci_adi||'-'}</strong></td>
+      <td>${b.bagisci_telefon||'-'}</td>
+      <td>${b.kimin_adina||'-'}</td>
+      <td style="font-size:12px;color:var(--text3)">${b.org_ad||'-'}</td>
+      <td>#${b.kurban_no} <span class="badge ${b.tur==='buyukbas'?'badge-green':'badge-yellow'}">${b.tur==='buyukbas'?'BB':'KB'}</span></td>
+      <td><span class="badge ${b.odeme_durumu==='odendi'?'badge-green':b.odeme_durumu==='iptal'?'badge-red':'badge-yellow'}">${b.odeme_durumu==='odendi'?'Ödendi':b.odeme_durumu==='iptal'?'İptal':'Bekliyor'}</span></td>
+      <td>${b.video_ister?'<span class="badge badge-blue">Evet</span>':'Hayır'}</td>
+      <td style="display:flex;gap:4px">
+        <button class="btn btn-secondary btn-sm" onclick="adminBagisciDuzenle(${b.id})"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-danger btn-sm" onclick="adminBagisciSil(${b.id})"><i class="fa-solid fa-trash"></i></button>
+      </td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function adminBagisciDuzenle(id) {
+  const b = _adminBagiscilar.find(x => x.id === id);
+  if (!b) return;
+  openModal('Bağışçı Düzenle', `
+    <div class="form-grid">
+      <div class="form-group"><label>Bağışçı Adı *</label><input id="ab-ad" value="${b.bagisci_adi||''}"/></div>
+      <div class="form-group"><label>Telefon</label><input id="ab-tel" value="${b.bagisci_telefon||''}"/></div>
+      <div class="form-group"><label>Kimin Adına</label><input id="ab-adina" value="${b.kimin_adina||''}"/></div>
+      <div class="form-group"><label>Adına Tel</label><input id="ab-adina-tel" value="${b.kimin_adina_telefon||''}"/></div>
+      <div class="form-group"><label>Ödeme Durumu</label>
+        <select id="ab-odeme">
+          <option value="bekliyor" ${b.odeme_durumu==='bekliyor'?'selected':''}>Bekliyor</option>
+          <option value="odendi" ${b.odeme_durumu==='odendi'?'selected':''}>Ödendi</option>
+          <option value="iptal" ${b.odeme_durumu==='iptal'?'selected':''}>İptal</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Video İster mi?</label>
+        <select id="ab-video">
+          <option value="0" ${!b.video_ister?'selected':''}>Hayır</option>
+          <option value="1" ${b.video_ister?'selected':''}>Evet</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">İptal</button>
+      <button class="btn btn-primary" onclick="adminBagisciKaydet(${id})"><i class="fa-solid fa-floppy-disk"></i> Kaydet</button>
+    </div>`, false, 'pen');
+}
+
+async function adminBagisciKaydet(id) {
+  const data = {
+    bagisci_adi: document.getElementById('ab-ad').value.trim(),
+    bagisci_telefon: document.getElementById('ab-tel').value.trim(),
+    kimin_adina: document.getElementById('ab-adina').value.trim(),
+    kimin_adina_telefon: document.getElementById('ab-adina-tel').value.trim(),
+    odeme_durumu: document.getElementById('ab-odeme').value,
+    video_ister: parseInt(document.getElementById('ab-video').value)
+  };
+  if (!data.bagisci_adi) return toast('Bağışçı adı zorunlu', 'error');
+  try {
+    await adminApi('PUT', '/bagisci-guncelle/' + id, data);
+    closeModal(); toast('Bağışçı güncellendi'); adminYukleBagiscilar();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function adminBagisciSil(id) {
+  if (!confirm('Bu bağışçıyı silmek istediğinizden emin misiniz? (Hisse boşaltılacak)')) return;
+  try {
+    await adminApi('DELETE', '/bagisci-sil/' + id);
+    toast('Bağışçı silindi'); adminYukleBagiscilar();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ─── YEDEK ───────────────────────────────────────────────────────────────────
+async function renderYedek() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-database"></i></div>
+        Yedek Yönetimi
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-download"></i> Manuel Yedek Al</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Tüm organizasyon, kurban, bağışçı ve ayar verilerini JSON olarak indirin.</p>
+        <button class="btn btn-success" onclick="adminYedekAl()">
+          <i class="fa-solid fa-download"></i> Yedek İndir (JSON)
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-upload"></i> Yedek Yükle</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Daha önce alınan JSON yedeği geri yükleyin. Mevcut veriler korunur, eksik olanlar eklenir.</p>
+        <input type="file" id="yedek-dosya-input" accept=".json" style="display:none" onchange="adminYedekYukle(this)"/>
+        <button class="btn btn-primary" onclick="document.getElementById('yedek-dosya-input').click()">
+          <i class="fa-solid fa-upload"></i> Yedek Dosyası Seç
+        </button>
+        <div id="yedek-yukle-sonuc" style="margin-top:10px;font-size:12px;color:var(--text3)"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Otomatik Yedekler
+        <span style="font-size:12px;font-weight:400;color:var(--text3);margin-left:8px">Her 10 dakikada bir otomatik alınır • Son 20 yedek saklanır</span>
+        <button class="btn btn-sm" onclick="adminOtoYedekListeYenile()" style="margin-left:auto;padding:4px 10px;font-size:12px">
+          <i class="fa-solid fa-rotate"></i> Yenile
+        </button>
+      </div>
+      <div id="oto-yedek-liste" style="margin-top:12px">
+        <div style="color:var(--text3);font-size:13px;text-align:center;padding:20px">Yükleniyor...</div>
+      </div>
+    </div>`;
+
+  adminOtoYedekListeYenile();
+}
+
+async function adminOtoYedekListeYenile() {
+  const el = document.getElementById('oto-yedek-liste');
+  if (!el) return;
+  try {
+    if (!window.electronAPI) {
+      el.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px">Otomatik yedekler sadece masaüstü uygulamada görüntülenebilir.</div>';
+      return;
+    }
+    const { dosyalar, dir } = await window.electronAPI.listAutoBackups();
+    if (!dosyalar || dosyalar.length === 0) {
+      el.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px"><i class="fa-solid fa-inbox" style="font-size:24px;display:block;margin-bottom:8px"></i>Henüz otomatik yedek yok.<br><small>Program açık kaldıkça her 10 dakikada bir yedek alınır.</small></div>';
+      return;
+    }
+    el.innerHTML = `
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Klasör: ${dir}</div>
+      <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:8px 6px;color:var(--text2)">Dosya Adı</th>
+            <th style="text-align:left;padding:8px 6px;color:var(--text2)">Tarih</th>
+            <th style="text-align:right;padding:8px 6px;color:var(--text2)">Boyut</th>
+            <th style="text-align:center;padding:8px 6px;color:var(--text2)">İşlem</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${dosyalar.map((d, i) => `
+            <tr style="border-bottom:1px solid var(--border);${i===0?'background:rgba(16,185,129,0.05)':''}">
+              <td style="padding:8px 6px;font-family:monospace;font-size:12px">${d.filename}${i===0?' <span style="background:#10b981;color:#fff;font-size:10px;padding:1px 5px;border-radius:4px;font-family:sans-serif">Son</span>':''}</td>
+              <td style="padding:8px 6px;color:var(--text2)">${new Date(d.mtime).toLocaleString('tr-TR')}</td>
+              <td style="padding:8px 6px;text-align:right;color:var(--text3)">${(d.size/1024).toFixed(1)} KB</td>
+              <td style="padding:8px 6px;text-align:center">
+                <button onclick="adminOtoYedekIndir('${d.filename}')" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;margin-right:4px" title="İndir">
+                  <i class="fa-solid fa-download"></i>
+                </button>
+                <button onclick="adminOtoYedekYukle('${d.filename}')" style="background:#f59e0b;color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;margin-right:4px" title="Bu yedeği geri yükle">
+                  <i class="fa-solid fa-rotate-left"></i>
+                </button>
+                <button onclick="adminOtoYedekSil('${d.filename}')" style="background:#ef4444;color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px" title="Sil">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      </div>`;
+  } catch(e) {
+    el.innerHTML = `<div style="color:#ef4444;font-size:13px;padding:12px">Hata: ${e.message}</div>`;
+  }
+}
+
+async function adminOtoYedekIndir(filename) {
+  if (!window.electronAPI) return;
+  const r = await window.electronAPI.downloadAutoBackup(filename);
+  if (r.ok) toast('Yedek kaydedildi: ' + r.path);
+  else if (!r.canceled) toast(r.error || 'İndirilemedi', 'error');
+}
+
+async function adminOtoYedekYukle(filename) {
+  if (!window.electronAPI) return;
+  if (!confirm(`"${filename}" yedeği geri yüklensin mi?\n\nMevcut veriler korunur, eksik olanlar eklenir.`)) return;
+  try {
+    // Dosyayı oku
+    const { dosyalar } = await window.electronAPI.listAutoBackups();
+    const dosya = dosyalar.find(d => d.filename === filename);
+    if (!dosya) { toast('Dosya bulunamadı', 'error'); return; }
+    
+    // Electron'dan dosya içeriğini al ve API'ye gönder
+    toast('Yedek yükleniyor...');
+    const r = await fetch('/api/admin/oto-yedek-yukle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename })
+    });
+    const d = await r.json();
+    if (!r.ok) { toast(d.hata || 'Yüklenemedi', 'error'); return; }
+    toast(`Yedek yüklendi: ${d.yuklenenOrg} org, ${d.yuklenenKurban} kurban, ${d.yuklenenHisse} hisse eklendi`);
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function adminOtoYedekSil(filename) {
+  if (!window.electronAPI) return;
+  if (!confirm(`"${filename}" silinsin mi?`)) return;
+  const r = await window.electronAPI.deleteAutoBackup(filename);
+  if (r.ok) { toast('Silindi'); adminOtoYedekListeYenile(); }
+  else toast(r.error || 'Silinemedi', 'error');
+
+async function adminYedekAl() {
+  try {
+    toast('Yedek hazırlanıyor...');
+    const r = await fetch('/api/admin/yedek-al', { headers: { 'Content-Type': 'application/json' } });
+    if (!r.ok) { toast('Yedek alınamadı', 'error'); return; }
+    const blob = await r.blob();
+    const tarih = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'icder-yedek-' + tarih + '.json';
+    a.click();
+    toast('Yedek indirildi');
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function adminYedekYukle(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const sonucEl = document.getElementById('yedek-yukle-sonuc');
+  if (sonucEl) sonucEl.textContent = 'Yükleniyor...';
+  try {
+    const formData = new FormData();
+    formData.append('yedek', file);
+    const r = await fetch('/api/admin/yedek-yukle-dosya', { method: 'POST', body: formData });
+    const d = await r.json();
+    if (!r.ok) { 
+      toast(d.hata || 'Yüklenemedi', 'error');
+      if (sonucEl) sonucEl.textContent = 'Hata: ' + (d.hata || 'Yüklenemedi');
+      return;
+    }
+    toast(`Yedek yüklendi: ${d.yuklenenOrg} org, ${d.yuklenenKurban} kurban, ${d.yuklenenHisse} hisse eklendi`);
+    if (sonucEl) sonucEl.innerHTML = `<span style="color:#10b981">✓ ${d.yuklenenOrg} organizasyon, ${d.yuklenenKurban} kurban, ${d.yuklenenHisse} hisse eklendi</span>`;
+    input.value = '';
+  } catch(e) { 
+    toast(e.message, 'error');
+    if (sonucEl) sonucEl.textContent = 'Hata: ' + e.message;
+  }
+}
+
+async function adminOtomatikYedekKaydet() {
+  // Artık kullanılmıyor - otomatik yedek her 10 dk'da bir çalışıyor
+  toast('Otomatik yedek her 10 dakikada bir otomatik alınıyor', 'info');
+}
