@@ -987,7 +987,7 @@ async function aramaBagisci() {
     await tumBagiscilariGoster();
     return;
   }
-  if (q.length < 2) return;
+  if (q.length < 1) return;
   let url = `/bagiscilar/ara?q=${encodeURIComponent(q)}`;
   if (S.orgId) url += `&orgId=${S.orgId}`;
   const list = await api('GET', url);
@@ -1350,9 +1350,7 @@ function yazdirilabilirHTML(tip) {
     '.stats{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px}' +
     '.stat{background:#f0f4ff;border:1px solid #c0d0ff;border-radius:6px;padding:10px 16px;min-width:100px}' +
     '.stat .v{font-size:22px;font-weight:bold;color:#1a2a50}.stat .l{font-size:10px;color:#666;text-transform:uppercase}' +
-    '.footer{margin-top:30px;font-size:12px;color:#333;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #ddd;padding-top:10px}' +
-    '.footer-left{font-weight:bold;font-size:14px}' +
-    '.footer-right{font-size:11px;color:#666}' +
+    '.footer{display:none}' +
     '@media print{body{margin:10px}}';
   return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + baslik + '</title>' +
     '<style>' + printStyle + '</style></head><body>' +
@@ -1367,9 +1365,7 @@ function yazdirilabilirHTML(tip) {
     '</div>' +
     '</div>' +
     (icerik ? icerik.innerHTML : '') +
-    '<div class="footer">' +
-    '<div class="footer-left">İÇDER</div>' +
-    '<div class="footer-right">icder.org.tr &nbsp;|&nbsp; ' + new Date().toLocaleDateString('tr-TR') + '</div>' +
+    '<div class="footer">İÇDER</div>' +
     '</div>' +
     '</body></html>';
 }
@@ -1451,7 +1447,7 @@ function kurbanYazdirHTML(kurbanNo, tur, hisseler, kurbanData, orientation = 'po
     '</tr></thead>' +
     '<tbody>' + rows + '</tbody>' +
     '</table>' +
-    '<div class="footer"><div style="float:left">İÇDER</div><div style="float:right">icder.org.tr</div></div>' +
+    '<div class="footer">İÇDER</div>' +
     '</body></html>';
 }
 
@@ -1499,7 +1495,7 @@ async function renderDenetim() {
           <tr><td style="color:var(--text3);padding:7px 0">İşbirliği</td><td style="color:var(--accent);font-weight:600">İÇDER & Defterdar</td></tr>
           <tr><td style="color:var(--text3);padding:7px 0">Modul</td><td>Kurban Organizasyonu</td></tr>
           <tr><td style="color:var(--text3);padding:7px 0">Lisans</td><td>İÇDER &copy; 2025</td></tr>
-          <tr><td style="color:var(--text3);padding:7px 0">Site</td><td><a href="https://icder.org.tr" target="_blank" style="color:var(--accent)">icder.org.tr</a></td></tr>
+          <tr><td style="color:var(--text3);padding:7px 0">Site</td><td><a href="https://icder.org.tr" target="_blank" style="color:var(--accent);text-decoration:none">icder.org.tr</a></td></tr>
         </table>
       </div>
       <div class="card">
@@ -1854,7 +1850,7 @@ function yazdirBagiscilar() {
     th { background: #1a2a50; color: #fff; padding: 9px 8px; text-align: left; font-size: 13px; }
     td { padding: 8px; border-bottom: 1px solid #ddd; font-size: 13px; }
     tr:nth-child(even) { background: #f5f5f5; }
-    .footer { margin-top: 20px; font-size: 11px; color: #999; display: flex; justify-content: space-between; border-top: 1px solid #ddd; padding-top: 8px; }
+    .footer { display: none; }
     @media print { body { margin: 0; } }
   `;
 
@@ -1869,7 +1865,7 @@ function yazdirBagiscilar() {
     '</div>' +
     '<table><thead><tr><th>#</th><th>Bağışçı Adı</th><th>Telefon</th><th>Kimin Adına</th><th>Kurban No</th><th>Hisse</th><th>Tür</th><th>Ödeme</th><th>Video</th></tr></thead>' +
     '<tbody>' + rows + '</tbody></table>' +
-    '<div class="footer"><span>İÇDER</span><span>' + new Date().toLocaleString('tr-TR') + '</span></div>' +
+    '<div class="footer">İÇDER</div>' +
     '</body></html>';
 
   printHTML(html);

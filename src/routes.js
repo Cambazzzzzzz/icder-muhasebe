@@ -178,11 +178,19 @@ router.get('/bagiscilar/ara', async (req, res) => {
       ORDER BY k.kurban_no ASC, h.hisse_no ASC LIMIT 500`).all(orgId);
   } else {
     if (!q) return res.json([]);
-    const like = `%${q}%`;
+    // Büyük/küçük harf duyarsız arama — LOWER() ile
+    const like = `%${q.toLowerCase()}%`;
+    // Telefon araması: kullanıcı + koymadan yazabilir, hem ham hem +90 olmadan ara
+    const telLike = `%${q.replace(/^\+/, '')}%`;
     list = db.prepare(`SELECT h.*, k.kurban_no, k.tur, k.organizasyon_id, k.id as kurban_id FROM hisseler h
       JOIN kurbanlar k ON h.kurban_id=k.id
-      WHERE h.bagisci_adi IS NOT NULL AND (h.bagisci_adi LIKE ? OR h.bagisci_telefon LIKE ?)
-      ORDER BY h.bagisci_adi LIMIT 50`).all(like, like);
+      WHERE h.bagisci_adi IS NOT NULL AND (
+        LOWER(h.bagisci_adi) LIKE ?
+        OR LOWER(COALESCE(h.bagisci_telefon,'')) LIKE ?
+        OR REPLACE(COALESCE(h.bagisci_telefon,''), '+', '') LIKE ?
+        OR LOWER(COALESCE(h.kimin_adina,'')) LIKE ?
+      )
+      ORDER BY h.bagisci_adi LIMIT 100`).all(like, like, telLike, like);
     if (orgId) list = list.filter(h => String(h.organizasyon_id) === String(orgId));
   }
   res.json(list);
