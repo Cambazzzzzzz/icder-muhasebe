@@ -114,6 +114,7 @@ const SCHEMA = `
     hisse_no INTEGER NOT NULL,
     bagisci_adi TEXT,
     bagisci_telefon TEXT,
+    bagisci_kategori TEXT DEFAULT 'Genel Bağışçı',
     kimin_adina TEXT,
     kimin_adina_telefon TEXT,
     odeme_durumu TEXT DEFAULT 'bekliyor',

@@ -150,16 +150,16 @@ router.get('/kurbanlar/:kurbanId/hisseler', async (req, res) => {
 
 router.put('/hisseler/:id', async (req, res) => {
   const db = await getDb();
-  const { bagisci_adi, bagisci_telefon, kimin_adina, kimin_adina_telefon, odeme_durumu, video_ister, aciklama } = req.body;
-  db.prepare(`UPDATE hisseler SET bagisci_adi=?,bagisci_telefon=?,kimin_adina=?,kimin_adina_telefon=?,odeme_durumu=?,video_ister=?,aciklama=? WHERE id=?`)
-    .run(bagisci_adi || null, bagisci_telefon || null, kimin_adina || null, kimin_adina_telefon || null,
+  const { bagisci_adi, bagisci_telefon, bagisci_kategori, kimin_adina, kimin_adina_telefon, odeme_durumu, video_ister, aciklama } = req.body;
+  db.prepare(`UPDATE hisseler SET bagisci_adi=?,bagisci_telefon=?,bagisci_kategori=?,kimin_adina=?,kimin_adina_telefon=?,odeme_durumu=?,video_ister=?,aciklama=? WHERE id=?`)
+    .run(bagisci_adi || null, bagisci_telefon || null, bagisci_kategori || 'Genel Bağışçı', kimin_adina || null, kimin_adina_telefon || null,
       odeme_durumu || 'bekliyor', video_ister ? 1 : 0, aciklama || null, req.params.id);
   res.json({ ok: true });
 });
 
 router.delete('/hisseler/:id/temizle', async (req, res) => {
   const db = await getDb();
-  db.prepare(`UPDATE hisseler SET bagisci_adi=NULL,bagisci_telefon=NULL,kimin_adina=NULL,kimin_adina_telefon=NULL,odeme_durumu='bekliyor',video_ister=0,aciklama=NULL WHERE id=?`)
+  db.prepare(`UPDATE hisseler SET bagisci_adi=NULL,bagisci_telefon=NULL,bagisci_kategori='Genel Bağışçı',kimin_adina=NULL,kimin_adina_telefon=NULL,odeme_durumu='bekliyor',video_ister=0,aciklama=NULL WHERE id=?`)
     .run(req.params.id);
   res.json({ ok: true });
 });
@@ -225,8 +225,8 @@ router.post('/organizasyonlar/:orgId/kurban-ve-hisseler', async (req, res) => {
     const hisseId = hr.lastInsertRowid;
     const h = hisseler && hisseler[i - 1];
     if (h && h.bagisci_adi && h.bagisci_adi.trim()) {
-      db.prepare(`UPDATE hisseler SET bagisci_adi=?,bagisci_telefon=?,kimin_adina=?,kimin_adina_telefon=?,odeme_durumu=?,video_ister=?,aciklama=? WHERE id=?`)
-        .run(h.bagisci_adi.trim(), h.bagisci_telefon||null, h.kimin_adina||null, h.kimin_adina_telefon||null,
+      db.prepare(`UPDATE hisseler SET bagisci_adi=?,bagisci_telefon=?,bagisci_kategori=?,kimin_adina=?,kimin_adina_telefon=?,odeme_durumu=?,video_ister=?,aciklama=? WHERE id=?`)
+        .run(h.bagisci_adi.trim(), h.bagisci_telefon||null, h.bagisci_kategori||'Genel Bağışçı', h.kimin_adina||null, h.kimin_adina_telefon||null,
           h.odeme_durumu||'bekliyor', h.video_ister?1:0, h.aciklama||null, hisseId);
     }
   }

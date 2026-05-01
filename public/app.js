@@ -158,8 +158,14 @@ const S = { page:'organizasyonlar', orgId:null, orgAd:'', orgYil:'' };
 
 const KURBAN_TURLERI = ['Udhiye','Adak','Akika','Vacip','Hedy','Sukur','Kiran','Temmettu','Ceza','Ihsar','Sadaka','Nafile','Olu','Kefaret','Sifa','Hacet','Fidye','Zekat','Nesike','Vesile','Atire'];
 
+const BAGISCI_KATEGORILERI = ['Genel Bağışçı','VIP Bağışçı','Kurumsal','Sponsor','Düzenli Bağışçı','Yeni Bağışçı','Eski Bağışçı','Özel Kategori'];
+
 function kurbanTuruOptions(secili) {
   return KURBAN_TURLERI.map(t => '<option value="' + t + '"' + (secili===t?' selected':'') + '>' + t + '</option>').join('');
+}
+
+function bagisciKategoriOptions(secili) {
+  return BAGISCI_KATEGORILERI.map(k => '<option value="' + k + '"' + (secili===k?' selected':'') + '>' + k + '</option>').join('');
 }
 
 // ─── API ─────────────────────────────────────────────────────────────────────
@@ -865,6 +871,10 @@ async function modalBagisciDuzenle(hisseId, kurbanId) {
         <input id="fh-tel" value="${esc(h.bagisci_telefon||'')}" placeholder="05xx xxx xx xx"/>
       </div>
       <div class="form-group">
+        <label>Kategori</label>
+        <select id="fh-kategori">${bagisciKategoriOptions(h.bagisci_kategori||'Genel Bağışçı')}</select>
+      </div>
+      <div class="form-group">
         <label>Kimin Adina <span style="color:var(--text3);font-weight:400">(Opsiyonel)</span></label>
         <input id="fh-adina" value="${esc(h.kimin_adina||'')}" placeholder="Vefat eden veya baska kisi"/>
       </div>
@@ -903,6 +913,7 @@ async function modalBagisciDuzenle(hisseId, kurbanId) {
 async function kaydetBagisci(hisseId, kurbanId) {
   const bagisci_adi = document.getElementById('fh-ad').value.trim();
   const bagisci_telefon = document.getElementById('fh-tel').value.trim();
+  const bagisci_kategori = document.getElementById('fh-kategori').value;
   const kimin_adina = document.getElementById('fh-adina').value.trim();
   const kimin_adina_telefon = document.getElementById('fh-adina-tel').value.trim();
   const odeme_durumu = document.getElementById('fh-odeme').value;
@@ -910,7 +921,7 @@ async function kaydetBagisci(hisseId, kurbanId) {
   const aciklama = document.getElementById('fh-not').value.trim();
   if (!bagisci_adi) return toast('Bagisci adi zorunlu','error');
   try {
-    await api('PUT',`/hisseler/${hisseId}`,{bagisci_adi,bagisci_telefon,kimin_adina,kimin_adina_telefon,odeme_durumu,video_ister,aciklama});
+    await api('PUT',`/hisseler/${hisseId}`,{bagisci_adi,bagisci_telefon,bagisci_kategori,kimin_adina,kimin_adina_telefon,odeme_durumu,video_ister,aciklama});
     closeModal(); toast('Bagisci kaydedildi');
     await loadKurbanlar();
   } catch(e) { toast(e.message,'error'); }
@@ -961,11 +972,11 @@ async function renderBagiscilar() {
       '<div class="table-wrap">' +
         '<table>' +
           '<thead><tr>' +
-            '<th>#</th><th>Bagisci Adi</th><th>Telefon</th><th>Kimin Adina</th>' +
+            '<th>#</th><th>Bagisci Adi</th><th>Telefon</th><th>Kategori</th><th>Kimin Adina</th>' +
             '<th>Kurban No</th><th>Hisse</th><th>Tur</th><th>Odeme</th><th>Video</th><th>Islem</th>' +
           '</tr></thead>' +
           '<tbody id="bagisci-tbody">' +
-            '<tr><td colspan="10"><div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Yukleniyor...</p></div></td></tr>' +
+            '<tr><td colspan="11"><div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Yukleniyor...</p></div></td></tr>' +
           '</tbody>' +
         '</table>' +
       '</div>' +
@@ -997,7 +1008,7 @@ async function aramaBagisci() {
 function renderBagisciTablosu(list) {
   const tbody = document.getElementById('bagisci-tbody');
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><i class="fa-solid fa-user-slash"></i><p>Sonuc bulunamadi.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state"><i class="fa-solid fa-user-slash"></i><p>Sonuc bulunamadi.</p></div></td></tr>`;
     return;
   }
   const oRenk  = {odendi:'badge-green',iptal:'badge-red',bekliyor:'badge-gray'};
@@ -1007,6 +1018,7 @@ function renderBagisciTablosu(list) {
       <td style="color:var(--text3);font-size:12px">${i+1}</td>
       <td><strong>${esc(h.bagisci_adi)}</strong></td>
       <td>${h.bagisci_telefon?esc(h.bagisci_telefon):'-'}</td>
+      <td>${h.bagisci_kategori?`<span class="badge badge-purple">${esc(h.bagisci_kategori)}</span>`:'-'}</td>
       <td>${h.kimin_adina?`<span style="color:var(--purple)">${esc(h.kimin_adina)}</span>`:'-'}</td>
       <td><span class="kurban-no-badge">${h.kurban_no}</span></td>
       <td><span class="badge badge-blue">${h.hisse_no}</span></td>
@@ -1092,6 +1104,8 @@ function bagisciTurSecildi() {
     html += '<input id="fb-ad-' + no + '" placeholder="Ad Soyad" oninput="bagisciAdGirildi(' + no + ')"/></div>';
     html += '<div class="form-group"><label>Telefon</label>';
     html += '<input id="fb-tel-' + no + '" placeholder="05xx xxx xx xx"/></div>';
+    html += '<div class="form-group"><label>Kategori</label>';
+    html += '<select id="fb-kategori-' + no + '">' + bagisciKategoriOptions('Genel Bağışçı') + '</select></div>';
     html += '<div class="form-group"><label>Kimin Adina <span style="color:var(--text3);font-weight:400">(Opsiyonel)</span></label>';
     html += '<input id="fb-adina-' + no + '" placeholder="Vefat eden / baska kisi"/></div>';
     html += '<div class="form-group"><label>Kimin Adina Tel <span style="color:var(--text3);font-weight:400">(Opsiyonel)</span></label>';
@@ -1138,6 +1152,7 @@ async function kaydetYeniBagisci() {
     hisseler.push({
       bagisci_adi:        document.getElementById(`fb-ad-${i}`)?.value.trim() || '',
       bagisci_telefon:    document.getElementById(`fb-tel-${i}`)?.value.trim() || '',
+      bagisci_kategori:   document.getElementById(`fb-kategori-${i}`)?.value || 'Genel Bağışçı',
       kimin_adina:        document.getElementById(`fb-adina-${i}`)?.value.trim() || '',
       kimin_adina_telefon:document.getElementById(`fb-adina-tel-${i}`)?.value.trim() || '',
       odeme_durumu:       document.getElementById(`fb-odeme-${i}`)?.value || 'bekliyor',
@@ -1847,8 +1862,8 @@ function yazdirBagiscilar() {
     .header-info .sub { font-size: 13px; color: #555; margin-top: 3px; }
     .header-right { text-align: right; font-size: 13px; color: #555; }
     table { width: 100%; border-collapse: collapse; }
-    th { background: #1a2a50; color: #fff; padding: 9px 8px; text-align: left; font-size: 13px; }
-    td { padding: 8px; border-bottom: 1px solid #ddd; font-size: 13px; }
+    th { background: #1a2a50; color: #fff; padding: 10px 8px; text-align: left; font-size: 14px; font-weight: bold; }
+    td { padding: 9px 8px; border-bottom: 1px solid #ddd; font-size: 14px; line-height: 1.5; }
     tr:nth-child(even) { background: #f5f5f5; }
     .footer { display: none; }
     @media print { body { margin: 0; } }
@@ -1863,7 +1878,7 @@ function yazdirBagiscilar() {
     '</div>' +
     '<div class="header-right">Organizasyon: <strong>' + esc(S.orgAd) + '</strong><br>' + S.orgYil + '</div>' +
     '</div>' +
-    '<table><thead><tr><th>#</th><th>Bağışçı Adı</th><th>Telefon</th><th>Kimin Adına</th><th>Kurban No</th><th>Hisse</th><th>Tür</th><th>Ödeme</th><th>Video</th></tr></thead>' +
+    '<table><thead><tr><th>#</th><th>Bağışçı Adı</th><th>Telefon</th><th>Kategori</th><th>Kimin Adına</th><th>Kurban No</th><th>Hisse</th><th>Tür</th><th>Ödeme</th><th>Video</th></tr></thead>' +
     '<tbody>' + rows + '</tbody></table>' +
     '<div class="footer">İÇDER</div>' +
     '</body></html>';
