@@ -208,7 +208,8 @@ function showPage(page) {
   document.querySelectorAll('.sidebar-item').forEach(el =>
     el.classList.toggle('active', el.dataset.page === page));
   document.getElementById('main-content').innerHTML = '';
-  if (page==='organizasyonlar' || page==='kurban-organizasyonu') renderOrganizasyonlar();
+  if (page==='tum-organizasyonlar') renderTumOrganizasyonlar();
+  else if (page==='organizasyonlar' || page==='kurban-organizasyonu') renderOrganizasyonlar();
   else if (page==='kurbanlar')   renderKurbanlar();
   else if (page==='bagiscilar')  renderBagiscilar();
   else if (page==='raporlar')    renderRaporlar();
@@ -966,8 +967,30 @@ async function renderBagiscilar() {
       '</div>' +
     '</div>' +
     '<div class="card">' +
-      '<div class="filter-bar" style="margin-bottom:16px">' +
-        '<input id="b-ara" placeholder="Ad veya telefon ile ara..." oninput="aramaBagisci()" style="min-width:300px"/>' +
+      '<div class="filter-bar" style="margin-bottom:16px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px">' +
+        '<input id="b-ara" placeholder="Ad veya telefon ile ara..." oninput="filterBagiscilar()"/>' +
+        '<select id="b-kategori" onchange="filterBagiscilar()">' +
+          '<option value="">Tüm Kategoriler</option>' +
+          '<option value="Genel Bağışçı">Genel Bağışçı</option>' +
+          '<option value="VIP Bağışçı">VIP Bağışçı</option>' +
+          '<option value="Kurumsal">Kurumsal</option>' +
+          '<option value="Sponsor">Sponsor</option>' +
+          '<option value="Düzenli Bağışçı">Düzenli Bağışçı</option>' +
+          '<option value="Yeni Bağışçı">Yeni Bağışçı</option>' +
+          '<option value="Eski Bağışçı">Eski Bağışçı</option>' +
+          '<option value="Özel Kategori">Özel Kategori</option>' +
+        '</select>' +
+        '<select id="b-odeme" onchange="filterBagiscilar()">' +
+          '<option value="">Tüm Ödemeler</option>' +
+          '<option value="odendi">Ödendi</option>' +
+          '<option value="bekliyor">Bekliyor</option>' +
+          '<option value="iptal">İptal</option>' +
+        '</select>' +
+        '<select id="b-video" onchange="filterBagiscilar()">' +
+          '<option value="">Video Durumu</option>' +
+          '<option value="1">Video İster</option>' +
+          '<option value="0">Video İstemez</option>' +
+        '</select>' +
       '</div>' +
       '<div class="table-wrap">' +
         '<table>' +
@@ -988,8 +1011,8 @@ async function renderBagiscilar() {
 async function tumBagiscilariGoster() {
   if (!S.orgId) return toast('Once bir organizasyon secin','error');
   let url = `/bagiscilar/ara?q=&orgId=${S.orgId}&tumunu=1`;
-  const list = await api('GET', url);
-  renderBagisciTablosu(list);
+  _tumBagiscilar = await api('GET', url);
+  renderBagisciTablosu(_tumBagiscilar);
 }
 
 async function aramaBagisci() {
@@ -1393,10 +1416,10 @@ function kurbanYazdirHTML(kurbanNo, tur, hisseler, kurbanData, orientation = 'po
   let rows = '';
   for (let i = 0; i < minSatir; i++) {
     const h = hisseler[i];
-    rows += '<tr style="height:42px">';
-    rows += '<td style="text-align:center;font-weight:bold;border:1.5px solid #000;padding:10px 6px;font-size:20px;width:60px">' + (i + 1) + '</td>';
-    rows += '<td style="border:1.5px solid #000;padding:10px 14px;font-size:20px;font-weight:600">' + (h && h.bagisci_adi ? h.bagisci_adi : '') + '</td>';
-    rows += '<td style="border:1.5px solid #000;padding:10px 14px;font-size:20px;width:160px;text-align:center">' + kurbanTuru + '</td>';
+    rows += '<tr style="height:50px">';
+    rows += '<td style="text-align:center;font-weight:900;border:2px solid #000;padding:12px 8px;font-size:24px;width:70px">' + (i + 1) + '</td>';
+    rows += '<td style="border:2px solid #000;padding:12px 16px;font-size:24px;font-weight:700">' + (h && h.bagisci_adi ? h.bagisci_adi : '') + '</td>';
+    rows += '<td style="border:2px solid #000;padding:12px 16px;font-size:24px;font-weight:700;width:180px;text-align:center">' + kurbanTuru + '</td>';
     rows += '</tr>';
   }
 
@@ -1416,16 +1439,16 @@ function kurbanYazdirHTML(kurbanNo, tur, hisseler, kurbanData, orientation = 'po
     @page { margin: 15mm; size: A4 ${orientation}; }
     * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     html, body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fff; color: #000; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #1a2a50; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #1a2a50; }
     .header-left { width: ${bayrakWidth}; display: flex; align-items: center; }
     .header-center { flex: 1; text-align: center; display: flex; align-items: center; justify-content: center; padding: 0 10px; }
     .header-center img { height: ${logoHeight}; max-width: ${logoMaxWidth}; object-fit: contain; }
     .header-right { width: ${bayrakWidth}; display: flex; align-items: center; justify-content: flex-end; }
     .header-right img { height: ${bayrakHeight}; width: ${bayrakWidth}; object-fit: contain; }
-    .kurban-title { font-size: 36px; font-weight: bold; color: #1a2a50; text-align: center; margin: 20px 0 30px 0; }
-    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    th { border: 1.5px solid #000; padding: 10px 14px; text-align: left; font-size: 18px; font-weight: bold; background: #fff; }
-    td { border: 1.5px solid #000; padding: 10px 14px; font-size: 18px; font-weight: 500; }
+    .kurban-title { font-size: 42px; font-weight: 900; color: #1a2a50; text-align: center; margin: 20px 0 30px 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; border: 2px solid #000; }
+    th { border: 2px solid #000; padding: 12px 16px; text-align: left; font-size: 22px; font-weight: 900; background: #fff; }
+    td { border: 2px solid #000; padding: 12px 16px; font-size: 22px; font-weight: 700; }
     .footer { display: none; }
     @media print {
       html, body { margin: 0; padding: 0; }
@@ -1855,15 +1878,15 @@ function yazdirBagiscilar() {
     @page { margin: 12mm 15mm; size: A4; }
     * { box-sizing: border-box; }
     body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fff; color: #000; }
-    .header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 12px; }
+    .header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; border-bottom: 3px solid #000; padding-bottom: 12px; }
     .header img { height: 70px; object-fit: contain; }
     .header-info { flex: 1; }
-    .header-info .title { font-size: 20px; font-weight: bold; }
-    .header-info .sub { font-size: 13px; color: #555; margin-top: 3px; }
-    .header-right { text-align: right; font-size: 13px; color: #555; }
-    table { width: 100%; border-collapse: collapse; }
-    th { background: #1a2a50; color: #fff; padding: 10px 8px; text-align: left; font-size: 14px; font-weight: bold; }
-    td { padding: 9px 8px; border-bottom: 1px solid #ddd; font-size: 14px; line-height: 1.5; }
+    .header-info .title { font-size: 22px; font-weight: 900; }
+    .header-info .sub { font-size: 15px; color: #333; margin-top: 3px; font-weight: 600; }
+    .header-right { text-align: right; font-size: 15px; color: #333; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; border: 2px solid #000; }
+    th { background: #1a2a50; color: #fff; padding: 12px 10px; text-align: left; font-size: 16px; font-weight: 900; border: 1px solid #000; }
+    td { padding: 11px 10px; border: 1px solid #999; font-size: 15px; line-height: 1.6; font-weight: 600; }
     tr:nth-child(even) { background: #f5f5f5; }
     .footer { display: none; }
     @media print { body { margin: 0; } }
@@ -4894,4 +4917,201 @@ function silPartner(id) {
 
 function filterPartnerler() {
   toast('Filtreleme özelliği geliştiriliyor...', 'info');
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TÜM ORGANİZASYONLAR - Tüm organizasyonların kurban ve bağışçılarını göster
+// ═══════════════════════════════════════════════════════════════════════════
+async function renderTumOrganizasyonlar() {
+  const m = document.getElementById('main-content');
+  m.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">
+        <div class="icon-wrap"><i class="fa-solid fa-layer-group"></i></div>
+        Tüm Organizasyonlar
+      </div>
+    </div>
+    <div id="tum-org-icerik"><div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Yükleniyor...</p></div></div>`;
+  
+  try {
+    const organizasyonlar = await api('GET', '/organizasyonlar');
+    
+    if (!organizasyonlar.length) {
+      document.getElementById('tum-org-icerik').innerHTML = 
+        '<div class="empty-state"><i class="fa-solid fa-layer-group"></i><p>Henüz organizasyon yok.</p></div>';
+      return;
+    }
+
+    let html = '';
+    
+    // Her organizasyon için ayrı kart
+    for (const org of organizasyonlar) {
+      const kurbanlar = await api('GET', `/organizasyonlar/${org.id}/kurbanlar`);
+      const hisseler = [];
+      
+      // Tüm kurbanların hisselerini topla
+      for (const k of kurbanlar) {
+        const kHisseler = await api('GET', `/kurbanlar/${k.id}/hisseler`);
+        kHisseler.forEach(h => {
+          if (h.bagisci_adi) {
+            hisseler.push({
+              ...h,
+              kurban_no: k.kurban_no,
+              tur: k.tur,
+              kurban_turu: k.kurban_turu
+            });
+          }
+        });
+      }
+
+      const toplamKurban = kurbanlar.length;
+      const toplamBagisci = hisseler.length;
+      const buyukbas = kurbanlar.filter(k => k.tur === 'buyukbas').length;
+      const kucukbas = kurbanlar.filter(k => k.tur === 'kucukbas').length;
+
+      html += `
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <i class="fa-solid fa-calendar-alt"></i> ${esc(org.ad)} (${org.yil})
+            </div>
+            <div style="display:flex;gap:8px">
+              <span class="badge badge-blue">${toplamKurban} Kurban</span>
+              <span class="badge badge-purple">${toplamBagisci} Bağışçı</span>
+            </div>
+          </div>
+          
+          <!-- İstatistikler -->
+          <div class="stats-grid" style="margin-bottom:16px">
+            <div class="stat-card blue">
+              <div class="stat-icon"><i class="fa-solid fa-cow"></i></div>
+              <div class="stat-value">${buyukbas}</div>
+              <div class="stat-label">Büyükbaş</div>
+            </div>
+            <div class="stat-card yellow">
+              <div class="stat-icon"><i class="fa-solid fa-hippo"></i></div>
+              <div class="stat-value">${kucukbas}</div>
+              <div class="stat-label">Küçükbaş</div>
+            </div>
+            <div class="stat-card green">
+              <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+              <div class="stat-value">${toplamBagisci}</div>
+              <div class="stat-label">Toplam Bağışçı</div>
+            </div>
+            <div class="stat-card purple">
+              <div class="stat-icon"><i class="fa-solid fa-money-bill"></i></div>
+              <div class="stat-value" style="font-size:16px">${para(org.buyukbas_hisse_fiyati)}</div>
+              <div class="stat-label">Büyükbaş Fiyat</div>
+            </div>
+          </div>
+
+          <!-- Kurbanlar Tablosu -->
+          <details style="margin-bottom:16px">
+            <summary style="cursor:pointer;padding:10px;background:var(--bg4);border-radius:8px;font-weight:600">
+              <i class="fa-solid fa-cow"></i> Kurbanlar (${toplamKurban})
+            </summary>
+            <div class="table-wrap" style="margin-top:12px">
+              <table>
+                <thead><tr>
+                  <th>No</th><th>Tür</th><th>Küpe No</th><th>Hisse</th><th>Durum</th>
+                </tr></thead>
+                <tbody>
+                  ${kurbanlar.map(k => `
+                    <tr>
+                      <td><span class="kurban-no-badge">${k.kurban_no}</span></td>
+                      <td>${k.tur==='buyukbas'?'<span class="badge badge-blue">Büyükbaş</span>':'<span class="badge badge-gray">Küçükbaş</span>'}</td>
+                      <td>${k.kupe_no||'-'}</td>
+                      <td>${k.dolu_hisse}/${k.toplam_hisse}</td>
+                      <td>${k.kesildi?'<span class="badge badge-red">Kesildi</span>':k.dolu_hisse>=k.toplam_hisse?'<span class="badge badge-yellow">Doldu</span>':'<span class="badge badge-green">Boş</span>'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </details>
+
+          <!-- Bağışçılar Tablosu -->
+          <details>
+            <summary style="cursor:pointer;padding:10px;background:var(--bg4);border-radius:8px;font-weight:600">
+              <i class="fa-solid fa-users"></i> Bağışçılar (${toplamBagisci})
+            </summary>
+            <div class="table-wrap" style="margin-top:12px">
+              <table>
+                <thead><tr>
+                  <th>Bağışçı Adı</th><th>Telefon</th><th>Kategori</th><th>Kurban No</th><th>Hisse</th><th>Ödeme</th>
+                </tr></thead>
+                <tbody>
+                  ${hisseler.map(h => `
+                    <tr>
+                      <td><strong>${esc(h.bagisci_adi)}</strong></td>
+                      <td>${h.bagisci_telefon||'-'}</td>
+                      <td>${h.bagisci_kategori?`<span class="badge badge-purple">${esc(h.bagisci_kategori)}</span>`:'-'}</td>
+                      <td><span class="kurban-no-badge">${h.kurban_no}</span></td>
+                      <td><span class="badge badge-blue">${h.hisse_no}</span></td>
+                      <td><span class="badge ${h.odeme_durumu==='odendi'?'badge-green':h.odeme_durumu==='iptal'?'badge-red':'badge-gray'}">${h.odeme_durumu==='odendi'?'Ödendi':h.odeme_durumu==='iptal'?'İptal':'Bekliyor'}</span></td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </details>
+        </div>
+      `;
+    }
+
+    document.getElementById('tum-org-icerik').innerHTML = html;
+    
+  } catch(e) {
+    document.getElementById('tum-org-icerik').innerHTML = 
+      `<div class="empty-state"><i class="fa-solid fa-exclamation-triangle"></i><p>Hata: ${e.message}</p></div>`;
+  }
+}
+
+
+// Bağışçı filtreleme fonksiyonu
+let _tumBagiscilar = [];
+
+async function filterBagiscilar() {
+  if (!S.orgId) return;
+  
+  // İlk yüklemede tüm bağışçıları çek
+  if (_tumBagiscilar.length === 0) {
+    const url = `/bagiscilar/ara?q=&orgId=${S.orgId}&tumunu=1`;
+    _tumBagiscilar = await api('GET', url);
+  }
+
+  const ara = (document.getElementById('b-ara')?.value || '').toLowerCase();
+  const kategori = document.getElementById('b-kategori')?.value || '';
+  const odeme = document.getElementById('b-odeme')?.value || '';
+  const video = document.getElementById('b-video')?.value || '';
+
+  let filtered = _tumBagiscilar.filter(h => {
+    // Arama filtresi
+    if (ara && !h.bagisci_adi.toLowerCase().includes(ara) && !(h.bagisci_telefon||'').toLowerCase().includes(ara)) {
+      return false;
+    }
+
+    // Kategori filtresi
+    if (kategori && h.bagisci_kategori !== kategori) {
+      return false;
+    }
+
+    // Ödeme filtresi
+    if (odeme && h.odeme_durumu !== odeme) {
+      return false;
+    }
+
+    // Video filtresi
+    if (video !== '') {
+      const videoIster = video === '1';
+      if (h.video_ister !== videoIster) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  renderBagisciTablosu(filtered);
 }
